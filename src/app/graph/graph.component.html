@@ -1,0 +1,59 @@
+<div class="container-fluid pt-3">
+  <div class="d-flex justify-content-lg-around">
+    <canvas id="functionCurveEditor" tabindex="-1">
+      Error: Your browser does not support the HTML canvas element.
+    </canvas>
+      <form [formGroup]="graphForm" class="d-flex flex-column ml-3">
+
+        <div class="custom-file mt-1">
+          <input type="file" class="custom-file-input" id="customFile" accept="image/png" (change)="handleFileInput($event.target.files)">
+          <label class="custom-file-label" for="customFile">Choose file</label>
+        </div>
+
+        <input formControlName="xAxisName" class="form-control" placeholder="X-axis name">
+        <input formControlName="yAxisName" class="form-control" placeholder="Y-axis name">
+        <div class="input-group" formGroupName="originPoint">
+              <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" (click)="tryToggleOrigin($event)">Origin</button>
+              <input type="number" formControlName="xValue" class="form-control" placeholder="X" required/>
+              <input type="number" formControlName="yValue" class="form-control" placeholder="Y" required/>
+              <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X" required/>
+              <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y" required/>
+        </div>
+        <div class="input-group" formGroupName="xAxisPoint">
+          <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" (click)="tryToggleX($event)">X-axis</button>
+          <input type="number" formControlName="xValue" class="form-control" placeholder="X" required/>
+          <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X" required/>
+          <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y" required/>
+        </div>
+        <div class="input-group" formGroupName="yAxisPoint">
+          <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" (click)="tryToggleY($event)">Y-axis</button>
+          <input type="number" formControlName="yValue" class="form-control" placeholder="Y" required/>
+          <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X" required/>
+          <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y" required/>
+        </div>
+
+        
+        <button class="btn-primary" (click)="addSubgraph()">Add Subgraph</button>
+
+        <!-- <ngb-accordion class="d-flex flex-column" [closeOthers]="true" activeIds="ngb-panel-0" (panelChange)="toggleAccordian($event)"> -->
+        <ngb-accordion class="d-flex flex-column" [closeOthers]="true" (panelChange)="toggleAccordian($event)">
+          <ngb-panel class="d-flex" *ngFor="let subgraph of subgraphs?.controls; let i = index" id="{{i}}">
+            <ng-template ngbPanelHeader let-opened="opened">
+              <!-- <div *ngIf="opened" (phone) = i>[count]={{i}}</div> -->
+              <div class="d-flex align-items-center justify-content-between">
+                <button ngbPanelToggle class="btn btn-link container-fluid text-left pl-0">Subgraph {{i}}</button>
+                <button class="btn-danger" (click)="deleteSubgraph(i)">Remove</button>
+              </div>
+            </ng-template>
+            <ng-template ngbPanelContent>
+              <subgraph class="d-flex" [index]="i" [subgraphForm]="subgraph" (deleteSubgraph)="deleteSubgraph($event)" 
+              (interpolationTypeChanged)="interpolationTypeChanged($event)"></subgraph>
+            </ng-template>
+          </ngb-panel>
+        </ngb-accordion>
+
+        <button type="submit" class="btn-primary" (click)="saveGraph()" [disabled]="graphForm.invalid">Save As...</button>
+        <pre>Parent Form Status: <span class="status">{{graphForm.status}}</span></pre>
+      </form>
+  </div>
+</div>
