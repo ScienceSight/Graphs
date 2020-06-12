@@ -6,6 +6,7 @@ import { SubgraphForm, GraphForm } from '../../_models/_forms'
 import { InterpolationType } from 'src/app/_models/_graph/interpolation-type'
 import { Point } from 'src/app/_models/_graph/point'
 import { WidgetState } from 'src/app/_models/_widget/widget-state'
+import { CalculatedGraphModel } from 'src/app/_models/_graph/calculated-graph-model'
 
 @Injectable()
 export class GraphFormService {
@@ -90,5 +91,68 @@ export class GraphFormService {
     const currentSubgraphs = currentGraph.get('subgraphs') as FormArray
     
     return currentSubgraphs.get('0');
+  }
+
+  setGraphData(calculatedGraph: CalculatedGraphModel)
+  {
+    const currentGraph = this.graphForm.getValue();
+    currentGraph.reset();
+    
+    if(calculatedGraph.xAxisName)
+    {
+      currentGraph.controls['xAxisName'].setValue(calculatedGraph.xAxisName);
+    }
+
+    if(calculatedGraph.yAxisName)
+    {
+      currentGraph.controls['yAxisName'].setValue(calculatedGraph.yAxisName);
+    }
+
+    if(calculatedGraph.originPoint)
+    {
+      (currentGraph.controls['originPoint'] as FormGroup).controls['xValue'].setValue(calculatedGraph.originPoint.xValue);
+      (currentGraph.controls['originPoint'] as FormGroup).controls['yValue'].setValue(calculatedGraph.originPoint.yValue);
+      (currentGraph.controls['originPoint'] as FormGroup).controls['xCoordinate'].setValue(calculatedGraph.originPoint.xCoordinate);
+      (currentGraph.controls['originPoint'] as FormGroup).controls['yCoordinate'].setValue(calculatedGraph.originPoint.yCoordinate);  
+    }
+
+    if(calculatedGraph.xAxisPoint)
+    {
+      (currentGraph.controls['xAxisPoint'] as FormGroup).controls['xValue'].setValue(calculatedGraph.xAxisPoint.xValue);
+      (currentGraph.controls['xAxisPoint'] as FormGroup).controls['xCoordinate'].setValue(calculatedGraph.xAxisPoint.xCoordinate);
+      (currentGraph.controls['xAxisPoint'] as FormGroup).controls['yCoordinate'].setValue(calculatedGraph.xAxisPoint.yCoordinate);  
+    }
+
+    if(calculatedGraph.yAxisPoint)
+    {
+      (currentGraph.controls['yAxisPoint'] as FormGroup).controls['yValue'].setValue(calculatedGraph.yAxisPoint.yValue); 
+      (currentGraph.controls['yAxisPoint'] as FormGroup).controls['xCoordinate'].setValue(calculatedGraph.yAxisPoint.xCoordinate);
+      (currentGraph.controls['yAxisPoint'] as FormGroup).controls['yCoordinate'].setValue(calculatedGraph.yAxisPoint.yCoordinate);  
+    }
+
+    if(calculatedGraph.subgraphs)
+    {
+      const currentSubgraphs = currentGraph.get('subgraphs') as FormArray
+      currentSubgraphs.clear();
+
+      for (let i = 0; i < calculatedGraph.subgraphs.length; i++) {
+        const subgraph = new Subgraph();
+        const stringEnum = calculatedGraph.subgraphs[i].interpolationType.charAt(0).toUpperCase() + 
+          calculatedGraph.subgraphs[i].interpolationType.slice(1);
+
+        subgraph.id = i;
+        subgraph.name = calculatedGraph.subgraphs[i].name;
+        subgraph.interpolationType = 
+          InterpolationType[stringEnum as keyof typeof InterpolationType];
+        subgraph.knots = calculatedGraph.subgraphs[i].knots;
+        subgraph.coordinates = calculatedGraph.subgraphs[i].coordinates;
+        
+        currentSubgraphs.push(
+          this.fb.group(
+            new SubgraphForm(subgraph)
+          )
+        )
+      }
+    }
   }
 }

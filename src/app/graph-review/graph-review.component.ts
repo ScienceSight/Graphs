@@ -118,10 +118,31 @@ export class GraphReviewComponent implements OnInit, OnDestroy {
   _handleReaderLoadedCsv(readerEvt) {
     const csvData = readerEvt.target.result;
     const csvToGraphModel = this.csvFileService.loadGraphDataFromCsvString(csvData);
+    const calculatedGraph = this.graphMathService.calculateOriginGraph(csvToGraphModel);
+
+    this.graphFormService.setGraphData(calculatedGraph);
+
+    const eState = this.widget.getEditorState();
+
+    eState.originPoint = {x:calculatedGraph.originPoint.xCoordinate, y:calculatedGraph.originPoint.yCoordinate};
+    eState.xAxisPoint = {x:calculatedGraph.xAxisPoint.xCoordinate, y:calculatedGraph.xAxisPoint.yCoordinate};
+    eState.yAxisPoint = {x:calculatedGraph.yAxisPoint.xCoordinate, y:calculatedGraph.yAxisPoint.yCoordinate};
+
+    if(this.currentActivePanelId == undefined
+      || this.currentActivePanelId >= calculatedGraph.subgraphs.length)
+    {
+      eState.knots = [];
+      this.widget.setConnected(false);
+    }
+    else
+    {
+      eState.knots = calculatedGraph.subgraphs[this.currentActivePanelId].knots;
+      eState.interpolationMethod = calculatedGraph.subgraphs[this.currentActivePanelId].interpolationType;
+    }
+
+    this.widget.setEditorState(eState);
+    
     this.csvFileLoaded = true;
-   // var binaryString = readerEvt.target.result;
-    //const base64textString = btoa(binaryString);
-    //this.widget.setWidgetContextImage(base64textString, this.csvFileToUpload.type);
   }
 
 
@@ -187,7 +208,6 @@ export class GraphReviewComponent implements OnInit, OnDestroy {
     }
     this.pointButtonsState.xAxis = true;
     this.togglePointButton();
-    //this.togglePointButton.emit(this.pointButtonsState);
   }
 
   tryToggleY(event: MouseEvent) {

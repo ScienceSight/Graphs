@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core'
 import { Subgraph, Graph } from '../../_models/_graph'
 import { Point, AxisPoint } from 'src/app/_models/_graph/point'
 import { CalculatedGraphModel } from 'src/app/_models/_graph/calculated-graph-model'
+import { CsvToGraphModel } from 'src/app/_models/_graph/csv-to-graph-model';
 
 @Injectable()
 export class GraphMathService {
@@ -42,6 +43,35 @@ export class GraphMathService {
 
             calculatedGraph.subgraphs.push(subgraph);     
           }
+
+        return calculatedGraph;
+    }
+
+    public calculateOriginGraph(data: CsvToGraphModel[]) : CalculatedGraphModel {
+        const calculatedGraph = new CalculatedGraphModel();
+
+        calculatedGraph.subgraphs = Array<Subgraph>();
+
+        if(data)
+        {
+            calculatedGraph.originPoint = data[0]?.originPoint;
+            calculatedGraph.xAxisName = data[0]?.xAxisName;
+            calculatedGraph.xAxisPoint = data[0]?.xAxisPoint;
+            calculatedGraph.yAxisName = data[0]?.yAxisName;
+            calculatedGraph.yAxisPoint = data[0]?.yAxisPoint;
+
+            for (let i = 0; i < data.length; i++) {
+                const subgraph = new Subgraph();
+          
+                subgraph.id = data[i].subgraphId;
+                subgraph.interpolationType = data[i].subgraphInterpolationType;
+                subgraph.name = data[i].subgraphName;
+                subgraph.knots = data[i].subgraphKnots;
+                subgraph.coordinates = [];
+    
+                calculatedGraph.subgraphs.push(subgraph);     
+              }
+        }
 
         return calculatedGraph;
     }
