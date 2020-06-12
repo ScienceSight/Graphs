@@ -1,5 +1,7 @@
 # Graphs
 
+  An Angular application for obtaining the real coordinates of the graph, having its image.
+
 # Installation
 
 - Download and install latest LTS version of Node.js.
