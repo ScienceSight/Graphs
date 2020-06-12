@@ -10,8 +10,8 @@
           <label class="custom-file-label" for="customFile">Choose file</label>
         </div>
 
-        <input formControlName="xAxisName" class="form-control" placeholder="X-axis name">
-        <input formControlName="yAxisName" class="form-control" placeholder="Y-axis name">
+        <input formControlName="xAxisName" class="form-control" placeholder="X-axis name" required>
+        <input formControlName="yAxisName" class="form-control" placeholder="Y-axis name" required>
         <div class="input-group" formGroupName="originPoint">
               <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" (click)="tryToggleOrigin($event)">Origin</button>
               <input type="number" formControlName="xValue" class="form-control" placeholder="X" required/>

@@ -34,7 +34,6 @@ export class SubgraphComponent implements OnInit {
   }
 
   onChange(newValue: string) {
-    console.log(newValue);
     this.interpolationTypeChanged.emit(newValue);
   }
 }

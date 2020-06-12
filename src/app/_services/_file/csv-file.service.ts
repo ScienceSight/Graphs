@@ -44,16 +44,20 @@ export class CsvFileService {
 
       //originPoint,subgraphCoordinates,subgraphId,subgraphInterpolationType,subgraphKnots,subgraphName,xAxisName,xAxisPoint,yAxisName,yAxisPoint
 
-      csvToGraphModel.originPoint = results[0] as any as AxisPoint;
-      csvToGraphModel.subgraphCoordinates = results[1] as any as Point[];
-      csvToGraphModel.subgraphId = results[2] as any as number;
-      csvToGraphModel.subgraphInterpolationType = results[3] as InterpolationType;
-      csvToGraphModel.subgraphKnots = results[4] as any as Point[];
-      csvToGraphModel.subgraphName = results[5];
-      csvToGraphModel.xAxisName = results[6];
-      csvToGraphModel.xAxisPoint = results[7] as any as AxisPoint;
-      csvToGraphModel.yAxisName = results[8];
-      csvToGraphModel.yAxisPoint = results[9] as any as AxisPoint;
+      //const obj = JSON.parse(results[0]);
+
+      const trimRegEx = /^\"+|\"+$/g;
+
+      csvToGraphModel.originPoint = JSON.parse(results[0]) as AxisPoint;
+      csvToGraphModel.subgraphCoordinates = JSON.parse(results[1]) as Point[];
+      csvToGraphModel.subgraphId = parseInt(results[2]?.replace(trimRegEx,''));
+      csvToGraphModel.subgraphInterpolationType = results[3]?.replace(trimRegEx,'') as InterpolationType;
+      csvToGraphModel.subgraphKnots = JSON.parse(results[4]) as Point[];  //Cannot read property 'replace' of undefined
+      csvToGraphModel.subgraphName = results[5]?.replace(trimRegEx,'');
+      csvToGraphModel.xAxisName = results[6]?.replace(trimRegEx,'');
+      csvToGraphModel.xAxisPoint = JSON.parse(results[7]) as AxisPoint;
+      csvToGraphModel.yAxisName = results[8]?.replace(trimRegEx,'');
+      csvToGraphModel.yAxisPoint = JSON.parse(results[9]) as AxisPoint;
       
 
       return csvToGraphModel;

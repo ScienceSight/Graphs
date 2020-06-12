@@ -16,12 +16,10 @@ export class GraphForm {
         xCoordinate: new FormControl(),
         yCoordinate: new FormControl(),
         xValue: new FormControl(),
-       // yValue: new FormControl(''),
       });
     yAxisPoint = new FormGroup({
         xCoordinate: new FormControl(),
         yCoordinate: new FormControl(),
-        //xValue: new FormControl(''),
         yValue: new FormControl(),
       });
     subgraphs = new FormArray([])
@@ -45,11 +43,6 @@ export class GraphForm {
         {
             this.yAxisPoint.setValue(graph.yAxisPoint);
         }
-
-        // if(graph.xAxisName)
-        // {
-        //     this.xAxisName.setValue(graph.xAxisName)
-        // }
 
         this.xAxisName.setValue(graph.xAxisName)
         //this.xAxisName.setValidators([Validators.required])
