@@ -34,7 +34,7 @@ export class GraphMathService {
 
             if(data.subgraphs[i].coordinates)
             {
-                subgraph.coordinates = this.calculateCoordinates(
+                subgraph.coordinates = this.calculateResultCoordinates(
                     data.subgraphs[i].coordinates,
                     data.originPoint,
                     xAxisPixelWeight,
@@ -60,6 +60,9 @@ export class GraphMathService {
             calculatedGraph.yAxisName = data[0]?.yAxisName;
             calculatedGraph.yAxisPoint = data[0]?.yAxisPoint;
 
+            const xAxisPixelWeight = this.calculatePixelWeightX(data[0]?.originPoint, data[0]?.xAxisPoint);
+            const yAxisPixelWeight = this.calculatePixelWeightY(data[0]?.originPoint, data[0]?.yAxisPoint);
+
             for (let i = 0; i < data.length; i++) {
                 const subgraph = new Subgraph();
           
@@ -67,7 +70,15 @@ export class GraphMathService {
                 subgraph.interpolationType = data[i].subgraphInterpolationType;
                 subgraph.name = data[i].subgraphName;
                 subgraph.knots = data[i].subgraphKnots;
-                subgraph.coordinates = [];
+                
+                if(data[i].subgraphCoordinates)
+                {
+                    subgraph.coordinates = this.calculateOriginCoordinates(
+                    data[i].subgraphCoordinates,
+                    data[i]?.originPoint,
+                    xAxisPixelWeight,
+                    yAxisPixelWeight);
+                }
     
                 calculatedGraph.subgraphs.push(subgraph);     
               }
@@ -84,12 +95,24 @@ export class GraphMathService {
         return (yAxisPoint.yValue - originPoint.yValue) / (yAxisPoint.yCoordinate - originPoint.yCoordinate); 
     }
 
-    calculateCoordinates(coordinates: Point[], originPoint: AxisPoint, xAxisPixelWeight: number, yAxisPixelWeight: number) : Point[] {
+    calculateResultCoordinates(coordinates: Point[], originPoint: AxisPoint, xAxisPixelWeight: number, yAxisPixelWeight: number) : Point[] {
         const result = Array<Point>();
 
         for (let i = 0; i < coordinates.length; i++) {
             const x = (coordinates[i].x - originPoint.xCoordinate) * xAxisPixelWeight + originPoint.xValue;
             const y = (coordinates[i].y - originPoint.yCoordinate) * yAxisPixelWeight + originPoint.yValue;
+            result.push({x:x, y:y});
+        }
+
+        return result;
+    }
+
+    calculateOriginCoordinates(coordinates: Point[], originPoint: AxisPoint, xAxisPixelWeight: number, yAxisPixelWeight: number) : Point[] {
+        const result = Array<Point>();
+
+        for (let i = 0; i < coordinates.length; i++) {
+            const x = (coordinates[i].x - originPoint.xValue) / xAxisPixelWeight + originPoint.xCoordinate;
+            const y = (coordinates[i].y - originPoint.yValue) / yAxisPixelWeight + originPoint.yCoordinate;
             result.push({x:x, y:y});
         }
 

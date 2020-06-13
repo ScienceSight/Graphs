@@ -117,8 +117,12 @@ export class GraphReviewComponent implements OnInit, OnDestroy {
 
   _handleReaderLoadedCsv(readerEvt) {
     const csvData = readerEvt.target.result;
+
     const csvToGraphModel = this.csvFileService.loadGraphDataFromCsvString(csvData);
+    console.log(csvToGraphModel);
+
     const calculatedGraph = this.graphMathService.calculateOriginGraph(csvToGraphModel);
+    console.log(calculatedGraph);
 
     this.graphFormService.setGraphData(calculatedGraph);
 

@@ -34,9 +34,16 @@ export class CsvFileService {
     }
 
   private parseCsvRowToGraphModel(csvRow: string) : CsvToGraphModel {
-      const results = this.parseCsvRow(csvRow);
+      let csvToGraphModel = new CsvToGraphModel();
 
-      return this.mapToGraphModel(results);
+      try {
+          const results = this.parseCsvRow(csvRow);
+          csvToGraphModel = this.mapToGraphModel(results);
+      } catch (error) {
+          throw error;
+      }
+
+      return csvToGraphModel;
     }
 
   private mapToGraphModel(results: string[]): CsvToGraphModel {
@@ -62,78 +69,84 @@ export class CsvFileService {
 
       return csvToGraphModel;
     }
+    
+    private parseCsvRow(csvRow: string) : string[] {
+        const results = [];
+        let line = "";
+        let previousElement = "";
 
-  private parseCsvRow(csvRow: string) : string[] {
-      const results = [];
-      let line = "";
-      let previousElement = "";
+  
+        for (let i = 0; i < csvRow.length; i++)
+        {
+            if ((line.includes('[') || csvRow[i] == '[') && line.search(/^".*/) == -1)
+            {
+                line += csvRow[i];
+                if(csvRow[i] == ']')
+                {
+                    results.push(line);
+                    line = "";
+                }
+                continue;
+            }
+  
+            if ((line.includes('{') || csvRow[i] == '{') && line.search(/^".*/) == -1)
+            {
+                line += csvRow[i];
+                if (csvRow[i] == '}')
+                {
+                    results.push(line);
+                    line = "";
+                }
+                continue;
+            }
+  
+            if ((line.includes('"') || csvRow[i] == '"') && csvRow[i] != ',')
+            {
+                line += csvRow[i];
+                if (line.search(/^".*"$/) != -1)
+                {
+                    results.push(line);
+                    line = "";
+                }
+                continue;
+            }
+  
+            if(i == 0 || i == csvRow.length - 1)
+            {
+                if(csvRow[i] == ',')
+                {
+                    results.push(undefined);
+                }
+            }
+  
+            if(i > 0)
+            {
+                previousElement = csvRow[i - 1];
+  
+                if(previousElement == ',' && csvRow[i] == ',' && line.length == 0)
+                {
+                    results.push(undefined);
+                    continue;
+                }
+  
+                if (csvRow[i] != ',' || (csvRow[i] == ',' && line.search(/^".*/) != -1))
+                {
+                    line += csvRow[i];
+                }
+                else if(line.length > 0 && csvRow[i] == ',')
+                {
+                    results.push(line);
+                    line = "";
+                }
+                continue;
+            }
+        }
 
-      for (let i = 0; i < csvRow.length; i++)
-      {
-          if (line.includes('[') || csvRow[i] == '[')
-          {
-              line += csvRow[i];
-              if(csvRow[i] == ']')
-              {
-                  results.push(line);
-                  line = "";
-              }
-              continue;
-          }
-
-          if (line.includes('{') || csvRow[i] == '{')
-          {
-              line += csvRow[i];
-              if (csvRow[i] == '}')
-              {
-                  results.push(line);
-                  line = "";
-              }
-              continue;
-          }
-
-          if (line.includes('"') || csvRow[i] == '"' && csvRow[i] != ',')
-          {
-              line += csvRow[i];
-              if (line.search(/".*"/) != -1)
-              {
-                  results.push(line);
-                  line = "";
-              }
-              continue;
-          }
-
-          if(i == 0 || i == csvRow.length - 1)
-          {
-              if(csvRow[i] == ',')
-              {
-                  results.push(undefined);
-              }
-          }
-
-          if(i > 0)
-          {
-              previousElement = csvRow[i - 1];
-
-              if(previousElement == ',' && csvRow[i] == ',')
-              {
-                  results.push(undefined);
-                  continue;
-              }
-
-              if (csvRow[i] != ',')
-              {
-                  line += csvRow[i];
-              }
-              else if(line.length > 0 && csvRow[i] == ',')
-              {
-                  results.push(line);
-                  line = "";
-              }
-              continue;
-          }
-      }
-
-      return results;
+        if(results.length != 10)
+        {
+            throw "Csv parse errors.";
+        }
+  
+        return results;
     }
 }
