@@ -1169,7 +1169,7 @@ function cloneEditorState (eState: EditorState) : EditorState {
    eState2.relevantXMax        = eState.relevantXMax;
    eState2.gridEnabled         = eState.gridEnabled ?? true;
    eState2.snapToGridEnabled   = eState.snapToGridEnabled ?? true;
-   eState2.interpolationMethod = eState.interpolationMethod ?? "linear";
+   eState2.interpolationMethod = eState.interpolationMethod ?? "bSpline";
    eState2.primaryZoomMode     = eState.primaryZoomMode ?? ZoomMode.xy;
    eState2.axisButtonsState    = eState.axisButtonsState ?? new ButtonsState();
    eState2.originPoint         = eState.originPoint;
