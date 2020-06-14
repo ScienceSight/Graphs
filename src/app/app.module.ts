@@ -13,15 +13,13 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CsvFileService } from './_services/_file/csv-file.service';
 import { GraphMathService } from './_services/_graph/graph-math.service';
-import { GraphReviewComponent } from './graph-review/graph-review.component';
 import { AppRoutingModule } from './app-routing.module';
 
 @NgModule({
   declarations: [
     AppComponent,
     SubgraphComponent,
-    GraphComponent,
-    GraphReviewComponent
+    GraphComponent
   ],
   imports: [
     AppRoutingModule,

@@ -25,8 +25,11 @@ export class GraphFormService {
       const currentGraph = this.graphForm.getValue()
       const currentSubgraphs = currentGraph.get('subgraphs') as FormArray
       const subgraph = currentSubgraphs.get(state.subgraphId.toString()) as FormGroup;
-      subgraph.controls['knots'].setValue(state.knots);
-      subgraph.controls['coordinates'].setValue(state.coordinates);
+      if(subgraph)
+      {
+        subgraph.controls['knots'].setValue(state.knots);
+        subgraph.controls['coordinates'].setValue(state.coordinates);
+      }
     }    
   }
   
@@ -53,13 +56,17 @@ export class GraphFormService {
   }
 
   getSubgraphData(currentActivePanelId: number) : WidgetState {
+    const widgetState = new WidgetState();
+
     const currentGraph = this.graphForm.getValue()
     const currentSubgraphs = currentGraph.get('subgraphs') as FormArray
     const subgraph = currentSubgraphs.get(currentActivePanelId.toString()) as FormGroup;
 
-    const widgetState = new WidgetState();
-    widgetState.interpolationType = subgraph.controls['interpolationType'].value as InterpolationType;
-    widgetState.knots = subgraph.controls['knots'].value as Point[];
+    if(subgraph)
+    {
+      widgetState.interpolationType = subgraph.controls['interpolationType'].value as InterpolationType;
+      widgetState.knots = subgraph.controls['knots'].value as Point[];
+    }
     
     return widgetState;
   }
@@ -86,11 +93,11 @@ export class GraphFormService {
     this.graphForm.next(currentGraph)
   }
 
-  getCurrentSubgraph(i: string) {
+  getSubgraphsLength() {
     const currentGraph = this.graphForm.getValue()
     const currentSubgraphs = currentGraph.get('subgraphs') as FormArray
     
-    return currentSubgraphs.get('0');
+    return currentSubgraphs.length;
   }
 
   setGraphData(calculatedGraph: CalculatedGraphModel)

@@ -12,6 +12,7 @@ import { Point, AxisPoint } from '../_models/_graph/point';
 import { CsvFileService } from '../_services/_file/csv-file.service';
 import { GraphToCsvModel } from '../_models/_graph/graph-to-csv-model';
 import { GraphMathService } from '../_services/_graph/graph-math.service';
+import { CsvToGraphModel } from '../_models/_graph/csv-to-graph-model';
 
 
 @Component({
@@ -27,8 +28,9 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   widget: FunctionCurveEditor.Widget;
 
-  fileToUpload: File = null;
-
+  imageFileToUpload: File = null;
+  csvFileToUpload: File = null;
+  
   loading = false;
   submitted = false;
   returnUrl: string;
@@ -75,30 +77,95 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   addSubgraph() {
-    this.graphFormService.addSubgraph()
-  }
+    this.graphFormService.addSubgraph();
 
-  deleteSubgraph(index: number) {
-    this.graphFormService.deleteSubgraph(index)
-  }
+    const length = this.graphFormService.getSubgraphsLength();
 
-  handleFileInput(files: FileList) {
-    this.fileToUpload = files.item(0);
-
-    if (files && this.fileToUpload) {
-      var reader = new FileReader();
-
-      reader.onload = this._handleReaderLoaded.bind(this);
-
-      reader.readAsBinaryString(this.fileToUpload);
+    if(length == 1)
+    {
+      this.setInitialWidgetState();
     }
   }
 
-  _handleReaderLoaded(readerEvt) {
+  deleteSubgraph(index: number) {
+    this.graphFormService.deleteSubgraph(index);
+
+    const length = this.graphFormService.getSubgraphsLength();
+
+    if(this.currentActivePanelId <= length)
+    {
+      this.setInitialWidgetState();
+    }
+  }
+
+  handleImageFileInput(files: FileList) {
+    this.imageFileToUpload = files.item(0);
+
+    if (files && this.imageFileToUpload) {
+      var reader = new FileReader();
+
+      reader.onload = this._handleReaderLoadedImage.bind(this);
+
+      reader.readAsBinaryString(this.imageFileToUpload);
+    }
+  }
+
+  _handleReaderLoadedImage(readerEvt) {
     var binaryString = readerEvt.target.result;
     const base64textString = btoa(binaryString);
-    this.widget.setWidgetContextImage(base64textString, this.fileToUpload.type);
-   }
+    this.widget.setConnected(true);
+    this.widget.setWidgetContextImage(base64textString, this.imageFileToUpload.type);
+  }
+
+  handleCsvFileInput(files: FileList) {
+    this.csvFileToUpload = files.item(0);
+
+    if (files && this.csvFileToUpload) {
+      var reader = new FileReader();
+
+      reader.onload = this._handleReaderLoadedCsv.bind(this);
+
+      reader.readAsText(this.csvFileToUpload);
+    }
+  }
+
+  _handleReaderLoadedCsv(readerEvt) {
+    const csvData = readerEvt.target.result;
+    let csvToGraphModel = new Array<CsvToGraphModel>();
+
+    try {
+      csvToGraphModel = this.csvFileService.loadGraphDataFromCsvString(csvData);
+      console.log(csvToGraphModel);
+    } catch (error) {
+      this.error = error;
+      throw error;
+    }
+
+    const calculatedGraph = this.graphMathService.calculateOriginGraph(csvToGraphModel);
+    console.log(calculatedGraph);
+
+    this.graphFormService.setGraphData(calculatedGraph);
+
+    const eState = this.widget.getEditorState();
+
+    eState.originPoint = {x:calculatedGraph.originPoint.xCoordinate, y:calculatedGraph.originPoint.yCoordinate};
+    eState.xAxisPoint = {x:calculatedGraph.xAxisPoint.xCoordinate, y:calculatedGraph.xAxisPoint.yCoordinate};
+    eState.yAxisPoint = {x:calculatedGraph.yAxisPoint.xCoordinate, y:calculatedGraph.yAxisPoint.yCoordinate};
+
+    if(this.currentActivePanelId == undefined
+      || this.currentActivePanelId >= calculatedGraph.subgraphs.length)
+    {
+      eState.knots = [];
+      this.widget.setConnected(false);
+    }
+    else
+    {
+      eState.knots = calculatedGraph.subgraphs[this.currentActivePanelId].knots;
+      eState.interpolationMethod = calculatedGraph.subgraphs[this.currentActivePanelId].interpolationType;
+    }
+
+    this.widget.setEditorState(eState);  
+  }
 
   saveGraph() {
     console.log(this.graphForm.value)
@@ -127,7 +194,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       graphToCsvModel.push(csvModel);     
     }
 
-    const fileName = (this.fileToUpload ? this.fileToUpload.name.split('.')[0] : 'myfile') + '.csv';
+    const fileName = (this.imageFileToUpload ? this.imageFileToUpload.name.split('.')[0] : 'myfile') + '.csv';
 
     this.csvFileService.saveCsvFromGraphData(graphToCsvModel, fileName);
   }
@@ -162,7 +229,6 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.pointButtonsState.xAxis = true;
     this.togglePointButton();
-    //this.togglePointButton.emit(this.pointButtonsState);
   }
 
   tryToggleY(event: MouseEvent) {
@@ -215,7 +281,6 @@ export class GraphComponent implements OnInit, OnDestroy {
       eState.knots = widgetState.knots;
       eState.interpolationMethod = widgetState.interpolationType;
     }
-
     this.widget.setEditorState(eState);
   }
 
@@ -228,16 +293,19 @@ export class GraphComponent implements OnInit, OnDestroy {
   public widgetChangeEventHandler() {
     const eState = this.widget.getEditorState();
 
-    const widgetState = new WidgetState();
-    widgetState.subgraphId = this.currentActivePanelId;
-    widgetState.interpolationType = eState.interpolationMethod as InterpolationType;
-    widgetState.knots = eState.knots;
-    widgetState.coordinates = eState.coordinates;
-    widgetState.originPoint = eState.originPoint as Point;
-    widgetState.xAxisPoint = eState.xAxisPoint as Point;
-    widgetState.yAxisPoint = eState.yAxisPoint as Point;
-
-    this.graphFormService.setSubgraphData(widgetState);
+    if(this.currentActivePanelId != undefined)
+    {
+      const widgetState = new WidgetState();
+      widgetState.subgraphId = this.currentActivePanelId;
+      widgetState.interpolationType = eState.interpolationMethod as InterpolationType;
+      widgetState.knots = eState.knots;
+      widgetState.coordinates = eState.coordinates;
+      widgetState.originPoint = eState.originPoint as Point;
+      widgetState.xAxisPoint = eState.xAxisPoint as Point;
+      widgetState.yAxisPoint = eState.yAxisPoint as Point;
+  
+      this.graphFormService.setSubgraphData(widgetState);
+    }
   }
 
   private startup(initialEditorState: FunctionCurveEditor.EditorState) {
