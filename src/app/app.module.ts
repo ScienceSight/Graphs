@@ -14,6 +14,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CsvFileService } from './_services/_file/csv-file.service';
 import { GraphMathService } from './_services/_graph/graph-math.service';
 import { AppRoutingModule } from './app-routing.module';
+import { JsonFileService } from './_services/_file/json-file.service';
 
 @NgModule({
   declarations: [
@@ -32,7 +33,8 @@ import { AppRoutingModule } from './app-routing.module';
   providers: [
     GraphFormService,
     GraphMathService,
-    CsvFileService
+    CsvFileService,
+    JsonFileService
   ],
   bootstrap: [AppComponent]
 })

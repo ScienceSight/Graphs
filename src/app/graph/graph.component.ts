@@ -9,10 +9,10 @@ import { Subgraph, Graph } from '../_models/_graph';
 import { InterpolationType } from '../_models/_graph/interpolation-type';
 import { WidgetState } from '../_models/_widget/widget-state';
 import { Point, AxisPoint } from '../_models/_graph/point';
-import { CsvFileService } from '../_services/_file/csv-file.service';
-import { GraphToCsvModel } from '../_models/_graph/graph-to-csv-model';
 import { GraphMathService } from '../_services/_graph/graph-math.service';
-import { CsvToGraphModel } from '../_models/_graph/csv-to-graph-model';
+import { JsonFileService } from '../_services/_file/json-file.service';
+import { JsonToGraphModel } from '../_models/_graph/json-to-graph-model';
+import { GraphToJsonModel } from '../_models/_graph/graph-to-json-model';
 
 
 @Component({
@@ -29,7 +29,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   widget: FunctionCurveEditor.Widget;
 
   imageFileToUpload: File = null;
-  csvFileToUpload: File = null;
+  jsonFileToUpload: File = null;
   
   loading = false;
   submitted = false;
@@ -47,7 +47,7 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   constructor(private graphFormService: GraphFormService,
               private graphMathService: GraphMathService,
-              private csvFileService: CsvFileService) { }
+              private jsonFileService: JsonFileService) { }
 
   ngOnInit() {
     this.graphFormSub = this.graphFormService.graphForm$
@@ -117,31 +117,31 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.widget.setWidgetContextImage(base64textString, this.imageFileToUpload.type);
   }
 
-  handleCsvFileInput(files: FileList) {
-    this.csvFileToUpload = files.item(0);
+  handleJsonFileInput(files: FileList) {
+    this.jsonFileToUpload = files.item(0);
 
-    if (files && this.csvFileToUpload) {
+    if (files && this.jsonFileToUpload) {
       var reader = new FileReader();
 
-      reader.onload = this._handleReaderLoadedCsv.bind(this);
+      reader.onload = this._handleReaderLoadedJson.bind(this);
 
-      reader.readAsText(this.csvFileToUpload);
+      reader.readAsText(this.jsonFileToUpload);
     }
   }
 
-  _handleReaderLoadedCsv(readerEvt) {
-    const csvData = readerEvt.target.result;
-    let csvToGraphModel = new Array<CsvToGraphModel>();
+  _handleReaderLoadedJson(readerEvt) {
+    const jsonData = readerEvt.target.result;
+    let jsonToGraphModel = new Array<JsonToGraphModel>();
 
     try {
-      csvToGraphModel = this.csvFileService.loadGraphDataFromCsvString(csvData);
-      console.log(csvToGraphModel);
+      jsonToGraphModel = this.jsonFileService.loadGraphDataFromJsonString(jsonData);
+      console.log(jsonToGraphModel);
     } catch (error) {
       this.error = error;
       throw error;
     }
 
-    const calculatedGraph = this.graphMathService.calculateOriginGraph(csvToGraphModel);
+    const calculatedGraph = this.graphMathService.calculateOriginGraph(jsonToGraphModel);
     console.log(calculatedGraph);
 
     this.graphFormService.setGraphData(calculatedGraph);
@@ -170,7 +170,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   saveGraph() {
     console.log(this.graphForm.value)
 
-    const graphToCsvModel = Array<GraphToCsvModel>();
+    const graphToJsonModel = Array<GraphToJsonModel>();
 
     const graphData = this.graphForm.value as Graph;
     const calculatedGraph = this.graphMathService.calculateResultGraph(graphData);
@@ -178,25 +178,25 @@ export class GraphComponent implements OnInit, OnDestroy {
     console.log(calculatedGraph)
 
     for (let i = 0; i < calculatedGraph.subgraphs.length; i++) {
-      const csvModel = new GraphToCsvModel();
+      const jsonModel = new GraphToJsonModel();
 
-      csvModel.originPoint = calculatedGraph.originPoint;
-      csvModel.subgraphCoordinates = calculatedGraph.subgraphs[i].coordinates;
-      csvModel.subgraphId = calculatedGraph.subgraphs[i].id;
-      csvModel.subgraphInterpolationType = calculatedGraph.subgraphs[i].interpolationType;
-      csvModel.subgraphKnots = calculatedGraph.subgraphs[i].knots;
-      csvModel.subgraphName = calculatedGraph.subgraphs[i].name;
-      csvModel.xAxisName = calculatedGraph.xAxisName;
-      csvModel.xAxisPoint = calculatedGraph.xAxisPoint;
-      csvModel.yAxisName = calculatedGraph.yAxisName;
-      csvModel.yAxisPoint = calculatedGraph.yAxisPoint;
+      jsonModel.originPoint = calculatedGraph.originPoint;
+      jsonModel.subgraphCoordinates = calculatedGraph.subgraphs[i].coordinates;
+      jsonModel.subgraphId = calculatedGraph.subgraphs[i].id;
+      jsonModel.subgraphInterpolationType = calculatedGraph.subgraphs[i].interpolationType;
+      jsonModel.subgraphKnots = calculatedGraph.subgraphs[i].knots;
+      jsonModel.subgraphName = calculatedGraph.subgraphs[i].name;
+      jsonModel.xAxisName = calculatedGraph.xAxisName;
+      jsonModel.xAxisPoint = calculatedGraph.xAxisPoint;
+      jsonModel.yAxisName = calculatedGraph.yAxisName;
+      jsonModel.yAxisPoint = calculatedGraph.yAxisPoint;
 
-      graphToCsvModel.push(csvModel);     
+      graphToJsonModel.push(jsonModel);     
     }
 
-    const fileName = (this.imageFileToUpload ? this.imageFileToUpload.name.split('.')[0] : 'myfile') + '.csv';
+    const fileName = (this.imageFileToUpload ? this.imageFileToUpload.name.split('.')[0] : 'myfile') + '.json';
 
-    this.csvFileService.saveCsvFromGraphData(graphToCsvModel, fileName);
+    this.jsonFileService.saveJsonFromGraphData(graphToJsonModel, fileName);
   }
 
   tryToggleOrigin(event: MouseEvent) {

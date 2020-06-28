@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core'
 import { Subgraph, Graph } from '../../_models/_graph'
 import { Point, AxisPoint } from 'src/app/_models/_graph/point'
 import { CalculatedGraphModel } from 'src/app/_models/_graph/calculated-graph-model'
-import { CsvToGraphModel } from 'src/app/_models/_graph/csv-to-graph-model';
+import { JsonToGraphModel } from 'src/app/_models/_graph/json-to-graph-model';
 
 @Injectable()
 export class GraphMathService {
@@ -47,7 +47,7 @@ export class GraphMathService {
         return calculatedGraph;
     }
 
-    public calculateOriginGraph(data: CsvToGraphModel[]) : CalculatedGraphModel {
+    public calculateOriginGraph(data: JsonToGraphModel[]) : CalculatedGraphModel {
         const calculatedGraph = new CalculatedGraphModel();
 
         calculatedGraph.subgraphs = Array<Subgraph>();
