@@ -1,20 +1,24 @@
 ul {
     list-style-type: none;
-  }
-  
-  .status {
-      color: green;
-      font-weight: 800;
-  }
-  
-  .ng-invalid .status {
-          color: red;
-  }
+}
 
- #functionCurveEditor {
+.status {
+    color: green;
+    font-weight: 800;
+}
+  
+.ng-invalid .status {
+    color: red;
+}
+
+#functionCurveEditor {
     display: block;
     width: 1000px;
     height: 700px;
     border: 1px solid black;
     margin-top: 5px;
     outline: none; }
+
+#graphForm {
+    max-height: 700px;
+}

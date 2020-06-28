@@ -3,58 +3,58 @@
     <canvas id="functionCurveEditor" tabindex="-1">
       Error: Your browser does not support the HTML canvas element.
     </canvas>
-      <form [formGroup]="graphForm" class="d-flex flex-column ml-3">
-        <div class="custom-file mt-1">
-          <input type="file" class="custom-file-input" id="customFile" accept="image/png" (change)="handleImageFileInput($event.target.files)">
-          <label class="custom-file-label" for="customFile">Choose .png file</label>
-        </div>
-        <span class="mt-2"></span>
-        <div class="custom-file">
-          <input type="file" class="custom-file-input" id="customFile" accept=".json" (change)="handleJsonFileInput($event.target.files)">
-          <label class="custom-file-label" for="customFile">Choose .json file</label>
-        </div>
-        <span class="mt-2"></span>
-        <input formControlName="xAxisName" class="form-control" placeholder="X-axis name" required>
-        <input formControlName="yAxisName" class="form-control" placeholder="Y-axis name" required>
-        <span class="mt-2"></span>
-        <div class="input-group" formGroupName="originPoint">
-            <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" (click)="tryToggleOrigin($event)">Origin</button>
-            <input type="number" formControlName="xValue" class="form-control" placeholder="X" required/>
-            <input type="number" formControlName="yValue" class="form-control" placeholder="Y" required/>
-            <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X" required/>
-            <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y" required/>
-        </div>
-        <div class="input-group" formGroupName="xAxisPoint">
-            <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" (click)="tryToggleX($event)">X-axis</button>
-            <input type="number" formControlName="xValue" class="form-control" placeholder="X" required/>
-            <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X" required/>
-            <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y" required/>
-        </div>
-        <div class="input-group" formGroupName="yAxisPoint">
-            <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" (click)="tryToggleY($event)">Y-axis</button>
-            <input type="number" formControlName="yValue" class="form-control" placeholder="Y" required/>
-            <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X" required/>
-            <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y" required/>
-        </div>
-        <span class="mt-2"></span>         
-        <button class="btn-primary" (click)="addSubgraph()">Add Subgraph</button>
-        <ngb-accordion class="d-flex flex-column" [closeOthers]="true" (panelChange)="toggleAccordian($event)">
-            <ngb-panel class="d-flex" *ngFor="let subgraph of subgraphs?.controls; let i = index" id="{{i}}">
-            <ng-template ngbPanelHeader let-opened="opened">
-                <div class="d-flex align-items-center justify-content-between">
-                <button ngbPanelToggle class="btn btn-link container-fluid text-left pl-0">Subgraph {{i}}</button>
-                <button class="btn-danger" (click)="deleteSubgraph(i)">Remove</button>
-                </div>
-            </ng-template>
-            <ng-template ngbPanelContent>
-                <subgraph class="d-flex" [index]="i" [subgraphForm]="subgraph" (deleteSubgraph)="deleteSubgraph($event)" 
-                (interpolationTypeChanged)="interpolationTypeChanged($event)"></subgraph>
-            </ng-template>
-            </ngb-panel>
-        </ngb-accordion> 
-        <button type="submit" class="btn-primary" (click)="saveGraph()" [disabled]="graphForm.invalid">Save As...</button>
-        <pre>Parent Form Status: <span class="status">{{graphForm.status}}</span></pre>
-      </form>
+    <form [formGroup]="graphForm" id="graphForm" class="d-flex flex-column ml-3 overflow-auto">
+      <div class="custom-file mt-1">
+        <input type="file" class="custom-file-input" id="customFile" accept="image/png" (change)="handleImageFileInput($event.target.files)">
+        <label class="custom-file-label" for="customFile">Choose .png file</label>
+      </div>
+      <span class="mt-2"></span>
+      <div class="custom-file">
+        <input type="file" class="custom-file-input" id="customFile" accept=".json" (change)="handleJsonFileInput($event.target.files)">
+        <label class="custom-file-label" for="customFile">Choose .json file</label>
+      </div>
+      <span class="mt-2"></span>
+      <input formControlName="xAxisName" class="form-control" placeholder="X-axis name" required>
+      <input formControlName="yAxisName" class="form-control" placeholder="Y-axis name" required>
+      <span class="mt-2"></span>
+      <div class="input-group" formGroupName="originPoint">
+          <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" (click)="tryToggleOrigin($event)">Origin</button>
+          <input type="number" formControlName="xValue" class="form-control" placeholder="X" required/>
+          <input type="number" formControlName="yValue" class="form-control" placeholder="Y" required/>
+          <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X" required/>
+          <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y" required/>
+      </div>
+      <div class="input-group" formGroupName="xAxisPoint">
+          <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" (click)="tryToggleX($event)">X-axis</button>
+          <input type="number" formControlName="xValue" class="form-control" placeholder="X" required/>
+          <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X" required/>
+          <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y" required/>
+      </div>
+      <div class="input-group" formGroupName="yAxisPoint">
+          <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" (click)="tryToggleY($event)">Y-axis</button>
+          <input type="number" formControlName="yValue" class="form-control" placeholder="Y" required/>
+          <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X" required/>
+          <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y" required/>
+      </div>
+      <span class="mt-2"></span>         
+      <button class="btn-primary" (click)="addSubgraph()">Add Subgraph</button>
+      <ngb-accordion class="d-flex flex-column" [closeOthers]="true" (panelChange)="toggleAccordian($event)">
+          <ngb-panel class="d-flex" *ngFor="let subgraph of subgraphs?.controls; let i = index" id="{{i}}">
+          <ng-template ngbPanelHeader let-opened="opened">
+              <div class="d-flex align-items-center justify-content-between">
+              <button ngbPanelToggle class="btn btn-link container-fluid text-left pl-0">Subgraph {{i}}</button>
+              <button class="btn-danger" (click)="deleteSubgraph(i)">Remove</button>
+              </div>
+          </ng-template>
+          <ng-template ngbPanelContent>
+              <subgraph class="d-flex" [index]="i" [subgraphForm]="subgraph" (deleteSubgraph)="deleteSubgraph($event)" 
+              (interpolationTypeChanged)="interpolationTypeChanged($event)"></subgraph>
+          </ng-template>
+          </ngb-panel>
+      </ngb-accordion> 
+      <button type="submit" class="btn-primary" (click)="saveGraph()" [disabled]="graphForm.invalid">Save As...</button>
+      <pre>Parent Form Status: <span class="status">{{graphForm.status}}</span></pre>
+    </form>
   </div>
   <!-- <div *ngIf="error" class="alert alert-danger mt-3 mb-0">{{error}}</div> -->
 </div>
