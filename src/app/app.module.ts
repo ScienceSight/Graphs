@@ -15,11 +15,15 @@ import { CsvFileService } from './_services/_file/csv-file.service';
 import { GraphMathService } from './_services/_graph/graph-math.service';
 import { AppRoutingModule } from './app-routing.module';
 import { JsonFileService } from './_services/_file/json-file.service';
+import { XAxisPointComponent } from './graph/x-axis-point/x-axis-point.component';
+import { YAxisPointComponent } from './graph/y-axis-point/y-axis-point.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     SubgraphComponent,
+    XAxisPointComponent,
+    YAxisPointComponent,
     GraphComponent
   ],
   imports: [

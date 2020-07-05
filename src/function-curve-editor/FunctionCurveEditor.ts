@@ -140,7 +140,7 @@ class FunctionPlotter {
       }
    }
 
-   private drawAxisPoint(lPoint: Point) {
+   private drawOriginAxisPoint(lPoint: Point, color: string) {
       const wctx = this.wctx;
       const ctx = this.ctx;
       const point = wctx.mapLogicalToCanvasCoordinates(lPoint);
@@ -149,27 +149,44 @@ class FunctionPlotter {
       const r = 5;
       ctx.arc(point.x, point.y, r, 0, 2 * Math.PI);
       ctx.lineWidth = 3;
-      ctx.strokeStyle = "#0080FF";
+      ctx.strokeStyle = color;
       ctx.stroke();
       ctx.restore();
    }
 
+   private drawXYAxisPoints(lPoints: Point[], color: string) {
+      const wctx = this.wctx;
+      const ctx = this.ctx;
+
+      for (let i = 0; i < lPoints.length; i++) {
+         const point = wctx.mapLogicalToCanvasCoordinates(lPoints[i]);
+         ctx.save();
+         ctx.beginPath();
+         const r = 5;
+         ctx.arc(point.x, point.y, r, 0, 2 * Math.PI);
+         ctx.lineWidth = 3;
+         ctx.strokeStyle = color;
+         ctx.stroke();
+         ctx.restore();
+      }
+   }
+
    private drawAxisPoints() {
       const originPoint = this.wctx.eState.originPoint;
-      const xPoint = this.wctx.eState.xAxisPoint;
-      const yPoint = this.wctx.eState.yAxisPoint;
+      const xPoints = this.wctx.eState.xAxisPoints;
+      const yPoints = this.wctx.eState.yAxisPoints;
 
       if(originPoint)
       {
-         this.drawAxisPoint(originPoint);
+         this.drawOriginAxisPoint(originPoint, "#ffb50c");
       }
-      if(xPoint)
+      if(xPoints)
       {
-         this.drawAxisPoint(xPoint);
+         this.drawXYAxisPoints(xPoints, "#28a745");
       }
-      if(yPoint)
+      if(yPoints)
       {
-         this.drawAxisPoint(yPoint);
+         this.drawXYAxisPoints(yPoints, "#17a2b8");
       }
    }
 
@@ -558,6 +575,7 @@ class PointerController {
          wctx.addOriginPoint(lPoint);
          wctx.requestRefresh();
          wctx.fireChangeEvent();
+         wctx.fireAxisPointSetEvent();
          return true;
       }
 
@@ -566,6 +584,7 @@ class PointerController {
          wctx.addXPoint(lPoint);
          wctx.requestRefresh();
          wctx.fireChangeEvent();
+         wctx.fireAxisPointSetEvent();
          return true;
       }
 
@@ -574,6 +593,7 @@ class PointerController {
          wctx.addYPoint(lPoint);
          wctx.requestRefresh();
          wctx.fireChangeEvent();
+         wctx.fireAxisPointSetEvent();
          return true;
       }
 
@@ -839,6 +859,7 @@ class WidgetContext {
    public image:                       HTMLImageElement;
    
    public handler: MyHandler;
+   public axisPointSetHandler: MyAxisPointSetHandler;
 
    constructor (canvas: HTMLCanvasElement) {
       this.canvas = canvas;
@@ -912,8 +933,9 @@ class WidgetContext {
 
    public clearAxisPoints() {
       this.eState.originPoint = undefined;
-      this.eState.xAxisPoint = undefined;
-      this.eState.yAxisPoint = undefined;
+      this.eState.xAxisPoints = [];
+      this.eState.yAxisPoints = [];
+      this.eState.axisPointIndex = 0;
       this.eState.axisButtonsState = new ButtonsState();
    }
 
@@ -1032,11 +1054,31 @@ class WidgetContext {
 
    public addXPoint (newKnot: Point) : void {
       const knot = PointUtils.clone(newKnot);
-      this.eState.xAxisPoint = knot; }
+      const index = this.eState.axisPointIndex;
+
+      if(index < this.eState.xAxisPoints.length)
+      {
+         this.eState.xAxisPoints[index] = knot;
+      }
+      else
+      {
+         this.eState.xAxisPoints.push(knot);
+      }
+   }
 
    public addYPoint (newKnot: Point) : void {
       const knot = PointUtils.clone(newKnot);
-      this.eState.yAxisPoint = knot; }
+      const index = this.eState.axisPointIndex;
+
+      if(index < this.eState.yAxisPoints.length)
+      {
+         this.eState.yAxisPoints[index] = knot;
+      }
+      else
+      {
+         this.eState.yAxisPoints.push(knot);
+      }
+   }
 
    public replaceKnots (newKnots: Point[]) {
       this.eState.knots = newKnots;
@@ -1121,9 +1163,12 @@ class WidgetContext {
       this.canvas.style.cursor = style; }
 
    public fireChangeEvent() {
-      //const event = new CustomEvent("change");
-      //this.eventTarget.dispatchEvent(event); 
       this.handler();
+   }
+
+   public fireAxisPointSetEvent() {
+      const index = this.eState.axisPointIndex;
+      this.axisPointSetHandler(index);
    }
 }
 
@@ -1133,6 +1178,7 @@ export const enum ZoomMode {x, y, xy}
 export {InterpolationMethod};
 
 export type MyHandler = () => void;
+export type MyAxisPointSetHandler = (index: number) => void;
 
 
 // Function curve editor state.
@@ -1151,8 +1197,9 @@ export interface EditorState {
    primaryZoomMode:          ZoomMode;                     // zoom mode to be used for mouse wheel when no shift/alt/ctrl-Key is pressed
    axisButtonsState:         ButtonsState;                 // Origin, X-Axis, Y-Axis form buttons state
    originPoint:              Point;                        // Origin point
-   xAxisPoint:               Point;                        // X-Axis point
-   yAxisPoint:               Point;                        // Y-Axis point
+   xAxisPoints:              Point[];                      // X-Axis point
+   yAxisPoints:              Point[];                      // Y-Axis point
+   axisPointIndex:           number;                       // X-Axis point or Y-Axis point index to change
    coordinates:              Point[];                      // Source coordinates
 }
 
@@ -1173,8 +1220,9 @@ function cloneEditorState (eState: EditorState) : EditorState {
    eState2.primaryZoomMode     = eState.primaryZoomMode ?? ZoomMode.xy;
    eState2.axisButtonsState    = eState.axisButtonsState ?? new ButtonsState();
    eState2.originPoint         = eState.originPoint;
-   eState2.xAxisPoint          = eState.xAxisPoint;
-   eState2.yAxisPoint          = eState.yAxisPoint;
+   eState2.xAxisPoints         = (eState.xAxisPoints ?? []).slice();
+   eState2.yAxisPoints         = (eState.yAxisPoints ?? []).slice();
+   eState2.axisPointIndex      = eState.axisPointIndex ?? 0;
    eState2.coordinates         = (eState.coordinates ?? []).slice();
    return eState2; }
 
@@ -1236,6 +1284,12 @@ export class Widget {
    public setWidgetChangeEventHandler(handler: MyHandler) : void {
       this.wctx.handler = handler;
    }   
+
+   // Registers an event handler.
+   // Event is fired after the user has set axis point by dblclick on canvas.
+   public setWidgetAxisPointSetEventHandler(handler: MyAxisPointSetHandler) : void {
+      this.wctx.axisPointSetHandler = handler;
+   }  
 
    // Updates the current state of the function curve editor.
    public setEditorState (eState: EditorState) {

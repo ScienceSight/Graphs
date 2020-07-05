@@ -15,7 +15,6 @@ export class SubgraphForm {
     subgraph: Subgraph
   ) {
     this.id.setValue(subgraph.id)
-    //this.id.setValidators([Validators.required])
 
     if(subgraph.interpolationType)
     {
@@ -25,15 +24,9 @@ export class SubgraphForm {
     {
       this.interpolationType.setValue(InterpolationType.BSpline)
     }
-    //this.interpolationType.setValidators([Validators.required])
 
     this.name.setValue(subgraph.name)
-    //this.xAxisName.setValidators([Validators.required])
-
     this.knots.setValue(subgraph.knots)
-    //this.knots.setValidators([Validators.required])
-
     this.coordinates.setValue(subgraph.coordinates)
-    //this.coordinates.setValidators([Validators.required])
   }
 }

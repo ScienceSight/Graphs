@@ -6,8 +6,9 @@ export class WidgetState{
     xAxisName: string;
     yAxisName: string;
     originPoint: Point;
-    xAxisPoint: Point;
-    yAxisPoint: Point;
+    xAxisPoints: Point[];
+    yAxisPoints: Point[];
+    axisPointIndex: number;
     interpolationType: InterpolationType;
     knots: Point[];
     coordinates: Point[];

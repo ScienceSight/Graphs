@@ -18,25 +18,30 @@
       <input formControlName="yAxisName" class="form-control" placeholder="Y-axis name" required>
       <span class="mt-2"></span>
       <div class="input-group" formGroupName="originPoint">
-          <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" (click)="tryToggleOrigin($event)">Origin</button>
+          <button type="button" id="btn_origin" class="btn btn-warning" data-toggle="button" aria-pressed="false" (click)="toggleOrigin($event)">Origin</button>
           <input type="number" formControlName="xValue" class="form-control" placeholder="X" required/>
           <input type="number" formControlName="yValue" class="form-control" placeholder="Y" required/>
           <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X" required/>
           <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y" required/>
       </div>
-      <div class="input-group" formGroupName="xAxisPoint">
-          <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" (click)="tryToggleX($event)">X-axis</button>
-          <input type="number" formControlName="xValue" class="form-control" placeholder="X" required/>
-          <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X" required/>
-          <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y" required/>
+
+      <span class="mt-2"></span>
+      <button class="btn-primary" (click)="addXAxisPoint()">Add X-axis point</button>
+      <div class="d-flex" *ngFor="let xAxisPoint of xAxisPoints?.controls; let i = index">
+        <x-axis-point class="d-flex flex-fill" [index]="i" [xAxisPointForm]="xAxisPoint" (deleteXAxisPoint)="deleteXAxisPoint($event)" 
+        (toggleXAxisPointButton)="toggleXAxisPointButton($event,i)"></x-axis-point>
+        <button class="btn-danger" *ngIf="i>0" (click)="deleteXAxisPoint(i)">Remove</button>
       </div>
-      <div class="input-group" formGroupName="yAxisPoint">
-          <button type="button" class="btn btn-primary" data-toggle="button" aria-pressed="false" (click)="tryToggleY($event)">Y-axis</button>
-          <input type="number" formControlName="yValue" class="form-control" placeholder="Y" required/>
-          <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X" required/>
-          <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y" required/>
+
+      <span class="mt-2"></span>
+      <button class="btn-primary" (click)="addYAxisPoint()">Add Y-axis point</button>
+      <div class="d-flex" *ngFor="let yAxisPoint of yAxisPoints?.controls; let i = index">
+        <y-axis-point class="d-flex flex-fill" [index]="i" [yAxisPointForm]="yAxisPoint" (deleteYAxisPoint)="deleteYAxisPoint($event)" 
+        (toggleYAxisPointButton)="toggleYAxisPointButton($event,i)"></y-axis-point>
+        <button class="btn-danger" *ngIf="i>0" (click)="deleteYAxisPoint(i)">Remove</button>
       </div>
-      <span class="mt-2"></span>         
+
+      <span class="mt-2"></span>   
       <button class="btn-primary" (click)="addSubgraph()">Add Subgraph</button>
       <ngb-accordion class="d-flex flex-column" [closeOthers]="true" (panelChange)="toggleAccordian($event)">
           <ngb-panel class="d-flex" *ngFor="let subgraph of subgraphs?.controls; let i = index" id="{{i}}">
@@ -52,8 +57,11 @@
           </ng-template>
           </ngb-panel>
       </ngb-accordion> 
+      <span class="mt-2"></span>
       <button type="submit" class="btn-primary" (click)="saveGraph()" [disabled]="graphForm.invalid">Save As...</button>
-      <pre>Parent Form Status: <span class="status">{{graphForm.status}}</span></pre>
+      <div>
+        <pre>Parent Form Status: <span class="status">{{graphForm.status}}</span></pre>
+      </div>
     </form>
   </div>
   <!-- <div *ngIf="error" class="alert alert-danger mt-3 mb-0">{{error}}</div> -->

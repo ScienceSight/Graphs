@@ -1,7 +1,5 @@
 import { FormArray, FormControl, FormGroup, FormBuilder } from '@angular/forms'
 import { Graph } from '../_graph/graph'
-import { AxisPointForm } from './axis-point-form'
-import { AxisPoint } from '../_graph/point'
 
 export class GraphForm {
     xAxisName = new FormControl()
@@ -23,10 +21,20 @@ export class GraphForm {
         yValue: new FormControl(),
       });
     subgraphs = new FormArray([])
+    xAxisPoints = new FormArray([])
+    yAxisPoints = new FormArray([])
 
     constructor(graph: Graph) {
         if (graph.subgraphs) {
             this.subgraphs.setValue(graph.subgraphs)
+        }
+
+        if (graph.xAxisPoints) {
+            this.xAxisPoints.setValue(graph.xAxisPoints)
+        }
+
+        if (graph.yAxisPoints) {
+            this.yAxisPoints.setValue(graph.yAxisPoints)
         }
 
         if(graph.originPoint)

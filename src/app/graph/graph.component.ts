@@ -13,6 +13,7 @@ import { GraphMathService } from '../_services/_graph/graph-math.service';
 import { JsonFileService } from '../_services/_file/json-file.service';
 import { JsonToGraphModel } from '../_models/_graph/json-to-graph-model';
 import { GraphToJsonModel } from '../_models/_graph/graph-to-json-model';
+import { Button } from 'protractor';
 
 
 @Component({
@@ -25,6 +26,8 @@ export class GraphComponent implements OnInit, OnDestroy {
   graphFormSub: Subscription;
   formInvalid: boolean = false;
   subgraphs: FormArray;
+  xAxisPoints: FormArray;
+  yAxisPoints: FormArray;
 
   widget: FunctionCurveEditor.Widget;
 
@@ -35,6 +38,8 @@ export class GraphComponent implements OnInit, OnDestroy {
   submitted = false;
   returnUrl: string;
   error = '';
+
+  axisButtonActive: boolean = false;
 
   currentActivePanelId: number = undefined;
   previousActivePanelId: number = undefined;
@@ -54,6 +59,8 @@ export class GraphComponent implements OnInit, OnDestroy {
       .subscribe(graph => {
           this.graphForm = graph
           this.subgraphs = this.graphForm.get('subgraphs') as FormArray
+          this.xAxisPoints = this.graphForm.get('xAxisPoints') as FormArray
+          this.yAxisPoints = this.graphForm.get('yAxisPoints') as FormArray
         });
        
        const initialEditorState = <FunctionCurveEditor.EditorState>{
@@ -68,6 +75,8 @@ export class GraphComponent implements OnInit, OnDestroy {
        };
 
        this.graphFormService.addSubgraph()
+       this.graphFormService.addXAxisPoint()
+       this.graphFormService.addYAxisPoint()
    
        this.startup(initialEditorState);
   }
@@ -87,6 +96,15 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
   }
 
+  addXAxisPoint() {
+    console.log(this.graphForm.value)
+    this.graphFormService.addXAxisPoint();
+  }
+
+  addYAxisPoint() {
+    this.graphFormService.addYAxisPoint();
+  }
+
   deleteSubgraph(index: number) {
     this.graphFormService.deleteSubgraph(index);
 
@@ -96,6 +114,24 @@ export class GraphComponent implements OnInit, OnDestroy {
     {
       this.setInitialWidgetState();
     }
+  }
+
+  deleteXAxisPoint(index: number) {
+    this.graphFormService.deleteXAxisPoint(index);
+
+    const eState = this.widget.getEditorState();
+    eState.xAxisPoints.splice(index,1);
+    eState.axisPointIndex = 0;
+    this.widget.setEditorState(eState); 
+  }
+
+  deleteYAxisPoint(index: number) {
+    this.graphFormService.deleteYAxisPoint(index);
+
+    const eState = this.widget.getEditorState();
+    eState.yAxisPoints.splice(index,1);
+    eState.axisPointIndex = 0;
+    this.widget.setEditorState(eState); 
   }
 
   handleImageFileInput(files: FileList) {
@@ -149,8 +185,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     const eState = this.widget.getEditorState();
 
     eState.originPoint = {x:calculatedGraph.originPoint.xCoordinate, y:calculatedGraph.originPoint.yCoordinate};
-    eState.xAxisPoint = {x:calculatedGraph.xAxisPoint.xCoordinate, y:calculatedGraph.xAxisPoint.yCoordinate};
-    eState.yAxisPoint = {x:calculatedGraph.yAxisPoint.xCoordinate, y:calculatedGraph.yAxisPoint.yCoordinate};
+    //eState.xAxisPoint = {x:calculatedGraph.xAxisPoint.xCoordinate, y:calculatedGraph.xAxisPoint.yCoordinate};
+    //eState.yAxisPoint = {x:calculatedGraph.yAxisPoint.xCoordinate, y:calculatedGraph.yAxisPoint.yCoordinate};
 
     if(this.currentActivePanelId == undefined
       || this.currentActivePanelId >= calculatedGraph.subgraphs.length)
@@ -199,53 +235,49 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.jsonFileService.saveJsonFromGraphData(graphToJsonModel, fileName);
   }
 
-  tryToggleOrigin(event: MouseEvent) {
-    const state = this.pointButtonsState.xAxis || this.pointButtonsState.yAxis;
-    if(state)
+  toggleOrigin(event: MouseEvent) {
+    if(this.axisButtonActive)
     {
       event.stopPropagation();
       return;
     }
-    if(this.pointButtonsState.origin)
-    {
-      this.pointButtonsState.origin = false;
-      return;
-    }
+
+    this.axisButtonActive = true;
     this.pointButtonsState.origin = true;
+
     this.togglePointButton();
   }
 
-  tryToggleX(event: MouseEvent) {
-    const state = this.pointButtonsState.origin || this.pointButtonsState.yAxis;
-    if(state)
+  toggleXAxisPointButton(event: MouseEvent, index: number) {
+    if(this.axisButtonActive)
     {
       event.stopPropagation();
       return;
     }
-    if(this.pointButtonsState.xAxis)
-    {
-      this.pointButtonsState.xAxis = false;
-      return;
-    }
+
+    this.axisButtonActive = true;
     this.pointButtonsState.xAxis = true;
-    this.togglePointButton();
+
+    const eState = this.widget.getEditorState();
+    eState.axisButtonsState = this.pointButtonsState;
+    eState.axisPointIndex = index;
+    this.widget.setEditorState(eState); 
   }
 
-  tryToggleY(event: MouseEvent) {
-    const state = this.pointButtonsState.origin || this.pointButtonsState.xAxis;
-    if(state)
+  toggleYAxisPointButton(buttonsState: ButtonsState, index: number) {
+    if(this.axisButtonActive)
     {
       event.stopPropagation();
       return;
     }
-    if(this.pointButtonsState.yAxis)
-    {
-      this.pointButtonsState.yAxis = false;
-      return;
-    }
+
+    this.axisButtonActive = true;
     this.pointButtonsState.yAxis = true;
-    this.togglePointButton();
-    //this.togglePointButton.emit(this.pointButtonsState);
+
+    const eState = this.widget.getEditorState();
+    eState.axisButtonsState = this.pointButtonsState;
+    eState.axisPointIndex = index;
+    this.widget.setEditorState(eState); 
   }
 
   togglePointButton() {
@@ -293,25 +325,49 @@ export class GraphComponent implements OnInit, OnDestroy {
   public widgetChangeEventHandler() {
     const eState = this.widget.getEditorState();
 
-    if(this.currentActivePanelId != undefined)
-    {
+    //if(this.currentActivePanelId != undefined)
+    //{
       const widgetState = new WidgetState();
       widgetState.subgraphId = this.currentActivePanelId;
       widgetState.interpolationType = eState.interpolationMethod as InterpolationType;
       widgetState.knots = eState.knots;
       widgetState.coordinates = eState.coordinates;
       widgetState.originPoint = eState.originPoint as Point;
-      widgetState.xAxisPoint = eState.xAxisPoint as Point;
-      widgetState.yAxisPoint = eState.yAxisPoint as Point;
+      widgetState.xAxisPoints = eState.xAxisPoints as Point[];
+      widgetState.yAxisPoints = eState.yAxisPoints as Point[];
+      widgetState.axisPointIndex = eState.axisPointIndex;
   
       this.graphFormService.setSubgraphData(widgetState);
+    //}
+  }
+
+  public widgetAxisPointSetEventHandler(index: number) {
+    if(this.pointButtonsState.origin)
+    {
+      document.getElementById('btn_origin').classList.remove('active');
     }
+    if(this.pointButtonsState.xAxis)
+    {
+      document.getElementById('btn_xAxis_' + index.toString()).classList.remove('active');
+    }
+    if(this.pointButtonsState.yAxis)
+    {
+      document.getElementById('btn_yAxis_' + index.toString()).classList.remove('active');
+    }
+
+    this.axisButtonActive = false;
+    this.pointButtonsState.origin = false;
+    this.pointButtonsState.xAxis = false;
+    this.pointButtonsState.yAxis = false;
+
+    this.togglePointButton();
   }
 
   private startup(initialEditorState: FunctionCurveEditor.EditorState) {
       const canvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById("functionCurveEditor");
       this.widget = new FunctionCurveEditor.Widget(canvas, false);
-      this.widget.setWidgetChangeEventHandler(()=> {this.widgetChangeEventHandler() });
+      this.widget.setWidgetChangeEventHandler(()=> {this.widgetChangeEventHandler()});
+      this.widget.setWidgetAxisPointSetEventHandler((x)=> {this.widgetAxisPointSetEventHandler(x)});
       this.widget.setEditorState(initialEditorState);
   }
 }
