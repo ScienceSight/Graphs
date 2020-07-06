@@ -7,4 +7,5 @@ export class Subgraph{
     name: string;
     knots: Point[];
     coordinates: Point[];
+    tempCoordinates: Point[];
 }

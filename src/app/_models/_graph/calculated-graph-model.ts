@@ -5,7 +5,7 @@ export class CalculatedGraphModel{
     xAxisName: string;
     yAxisName: string;
     originPoint: AxisPoint;
-    xAxisPoint: AxisPoint;
-    yAxisPoint: AxisPoint;
+    xAxisPoints: AxisPoint[];
+    yAxisPoints: AxisPoint[];
     subgraphs: Subgraph[];  
 }

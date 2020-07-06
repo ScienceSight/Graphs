@@ -1,0 +1,8 @@
+<form [formGroup]="xAxisPointForm" class="d-flex flex-fill">
+    <div class="input-group">
+        <button type="button" id="btn_xAxis_{{index}}" class="btn btn-success" data-toggle="button" aria-pressed="false" (click)="tryToggle($event)">X-axis</button>
+        <input type="number" formControlName="xValue" class="form-control" placeholder="X"/>
+        <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X"/>
+        <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y"/>
+    </div>
+</form>
