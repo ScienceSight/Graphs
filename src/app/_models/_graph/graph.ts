@@ -7,9 +7,7 @@ export class Graph{
     xAxisName: string;
     yAxisName: string;
     originPoint: AxisPoint;
-    xAxisPoint: AxisPoint;
-    yAxisPoint: AxisPoint;
     subgraphs: Subgraph[];
-    xAxisPoints: XAxisPoint[];  
-    yAxisPoints: YAxisPoint[];  
+    xAxisPoints: AxisPoint[];  
+    yAxisPoints: AxisPoint[];  
 }

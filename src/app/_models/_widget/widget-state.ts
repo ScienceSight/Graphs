@@ -1,4 +1,4 @@
-import { AxisPoint, Point } from '../_graph/point';
+import { Point } from '../_graph/point';
 import { InterpolationType } from '../_graph/interpolation-type';
 
 export class WidgetState{

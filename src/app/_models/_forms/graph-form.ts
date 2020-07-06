@@ -10,16 +10,6 @@ export class GraphForm {
         xValue: new FormControl(),
         yValue: new FormControl(),
       });
-    xAxisPoint = new FormGroup({
-        xCoordinate: new FormControl(),
-        yCoordinate: new FormControl(),
-        xValue: new FormControl(),
-      });
-    yAxisPoint = new FormGroup({
-        xCoordinate: new FormControl(),
-        yCoordinate: new FormControl(),
-        yValue: new FormControl(),
-      });
     subgraphs = new FormArray([])
     xAxisPoints = new FormArray([])
     yAxisPoints = new FormArray([])
@@ -42,29 +32,7 @@ export class GraphForm {
             this.originPoint.setValue(graph.originPoint);
         }
 
-        if(graph.xAxisPoint)
-        {
-            this.xAxisPoint.setValue(graph.xAxisPoint);
-        }
-
-        if(graph.yAxisPoint)
-        {
-            this.yAxisPoint.setValue(graph.yAxisPoint);
-        }
-
         this.xAxisName.setValue(graph.xAxisName)
-        //this.xAxisName.setValidators([Validators.required])
-
         this.yAxisName.setValue(graph.yAxisName)
-        //this.yAxisName.setValidators([Validators.required])
-
-        //this.originPoint.setValue(graph.originPoint)
-        //this.originPoint.setValidators([Validators.required])
-
-        //this.xAxisPoint.setValue(graph.xAxisPoint)
-        //this.xAxisPoint.setValidators([Validators.required])
-
-        //this.yAxisPoint.setValue(graph.yAxisPoint)
-        //this.yAxisPoint.setValidators([Validators.required])
     }
 }

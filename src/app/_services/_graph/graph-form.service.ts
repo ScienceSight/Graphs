@@ -4,7 +4,7 @@ import { FormGroup, FormBuilder, FormArray, Validators, Form, AbstractControl } 
 import { Subgraph, Graph } from '../../_models/_graph'
 import { SubgraphForm, GraphForm } from '../../_models/_forms'
 import { InterpolationType } from 'src/app/_models/_graph/interpolation-type'
-import { Point } from 'src/app/_models/_graph/point'
+import { Point, AxisPoint } from 'src/app/_models/_graph/point'
 import { WidgetState } from 'src/app/_models/_widget/widget-state'
 import { CalculatedGraphModel } from 'src/app/_models/_graph/calculated-graph-model'
 import { XAxisPointForm } from 'src/app/_models/_forms/x-axis-point-form'
@@ -134,18 +134,44 @@ export class GraphFormService {
       (currentGraph.controls['originPoint'] as FormGroup).controls['yCoordinate'].setValue(calculatedGraph.originPoint.yCoordinate);  
     }
 
-    if(calculatedGraph.xAxisPoint)
+    if(calculatedGraph.xAxisPoints)
     {
-      (currentGraph.controls['xAxisPoint'] as FormGroup).controls['xValue'].setValue(calculatedGraph.xAxisPoint.xValue);
-      (currentGraph.controls['xAxisPoint'] as FormGroup).controls['xCoordinate'].setValue(calculatedGraph.xAxisPoint.xCoordinate);
-      (currentGraph.controls['xAxisPoint'] as FormGroup).controls['yCoordinate'].setValue(calculatedGraph.xAxisPoint.yCoordinate);  
+      const currentXAxisPoints = currentGraph.get('xAxisPoints') as FormArray
+      currentXAxisPoints.clear();
+
+      for (let i = 0; i < calculatedGraph.xAxisPoints.length; i++) {
+        let xAxisPoint = new XAxisPoint();
+
+        xAxisPoint.xValue = calculatedGraph.xAxisPoints[i].xValue;
+        xAxisPoint.xCoordinate = calculatedGraph.xAxisPoints[i].xCoordinate;
+        xAxisPoint.yCoordinate = calculatedGraph.xAxisPoints[i].yCoordinate;
+ 
+        currentXAxisPoints.push(
+          this.fb.group(
+            new XAxisPointForm(xAxisPoint)
+          )
+        )
+      }
     }
 
-    if(calculatedGraph.yAxisPoint)
+    if(calculatedGraph.yAxisPoints)
     {
-      (currentGraph.controls['yAxisPoint'] as FormGroup).controls['yValue'].setValue(calculatedGraph.yAxisPoint.yValue); 
-      (currentGraph.controls['yAxisPoint'] as FormGroup).controls['xCoordinate'].setValue(calculatedGraph.yAxisPoint.xCoordinate);
-      (currentGraph.controls['yAxisPoint'] as FormGroup).controls['yCoordinate'].setValue(calculatedGraph.yAxisPoint.yCoordinate);  
+      const currentYAxisPoints = currentGraph.get('yAxisPoints') as FormArray
+      currentYAxisPoints.clear();
+
+      for (let i = 0; i < calculatedGraph.yAxisPoints.length; i++) {
+        let yAxisPoint = new YAxisPoint();
+
+        yAxisPoint.yValue = calculatedGraph.yAxisPoints[i].yValue;
+        yAxisPoint.xCoordinate = calculatedGraph.yAxisPoints[i].xCoordinate;
+        yAxisPoint.yCoordinate = calculatedGraph.yAxisPoints[i].yCoordinate;
+ 
+        currentYAxisPoints.push(
+          this.fb.group(
+            new YAxisPointForm(yAxisPoint)
+          )
+        )
+      }  
     }
 
     if(calculatedGraph.subgraphs)
@@ -163,7 +189,7 @@ export class GraphFormService {
         subgraph.interpolationType = 
           InterpolationType[stringEnum as keyof typeof InterpolationType];
         subgraph.knots = calculatedGraph.subgraphs[i].knots;
-        subgraph.coordinates = calculatedGraph.subgraphs[i].coordinates;
+        subgraph.coordinates = calculatedGraph.subgraphs[i].tempCoordinates;
         
         currentSubgraphs.push(
           this.fb.group(

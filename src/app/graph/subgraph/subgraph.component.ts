@@ -1,8 +1,6 @@
 import { Component, OnInit, Input, Output, ChangeDetectionStrategy, EventEmitter } from '@angular/core'
 import { FormGroup } from '@angular/forms'
 import { InterpolationType } from "../../_models/_graph/interpolation-type"
-import { NgbPanelChangeEvent } from '@ng-bootstrap/ng-bootstrap'
-import { SubgraphForm } from 'src/app/_models/_forms/subgraph-form'
 import { ButtonsState } from 'src/app/_models/_graph/buttons-state'
 
 @Component({

@@ -167,7 +167,7 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   _handleReaderLoadedJson(readerEvt) {
     const jsonData = readerEvt.target.result;
-    let jsonToGraphModel = new Array<JsonToGraphModel>();
+    let jsonToGraphModel = new JsonToGraphModel();
 
     try {
       jsonToGraphModel = this.jsonFileService.loadGraphDataFromJsonString(jsonData);
@@ -185,8 +185,16 @@ export class GraphComponent implements OnInit, OnDestroy {
     const eState = this.widget.getEditorState();
 
     eState.originPoint = {x:calculatedGraph.originPoint.xCoordinate, y:calculatedGraph.originPoint.yCoordinate};
-    //eState.xAxisPoint = {x:calculatedGraph.xAxisPoint.xCoordinate, y:calculatedGraph.xAxisPoint.yCoordinate};
-    //eState.yAxisPoint = {x:calculatedGraph.yAxisPoint.xCoordinate, y:calculatedGraph.yAxisPoint.yCoordinate};
+
+    eState.xAxisPoints = [];
+    for (let i = 0; i < calculatedGraph.xAxisPoints.length; i++) {
+      eState.xAxisPoints.push({x:calculatedGraph.xAxisPoints[i].xCoordinate, y:calculatedGraph.xAxisPoints[i].yCoordinate});    
+    }
+
+    eState.yAxisPoints = [];
+    for (let i = 0; i < calculatedGraph.yAxisPoints.length; i++) {
+      eState.yAxisPoints.push({x:calculatedGraph.yAxisPoints[i].xCoordinate, y:calculatedGraph.yAxisPoints[i].yCoordinate});    
+    }
 
     if(this.currentActivePanelId == undefined
       || this.currentActivePanelId >= calculatedGraph.subgraphs.length)
@@ -206,33 +214,14 @@ export class GraphComponent implements OnInit, OnDestroy {
   saveGraph() {
     console.log(this.graphForm.value)
 
-    const graphToJsonModel = Array<GraphToJsonModel>();
-
     const graphData = this.graphForm.value as Graph;
     const calculatedGraph = this.graphMathService.calculateResultGraph(graphData);
     
     console.log(calculatedGraph)
 
-    for (let i = 0; i < calculatedGraph.subgraphs.length; i++) {
-      const jsonModel = new GraphToJsonModel();
-
-      jsonModel.originPoint = calculatedGraph.originPoint;
-      jsonModel.subgraphCoordinates = calculatedGraph.subgraphs[i].coordinates;
-      jsonModel.subgraphId = calculatedGraph.subgraphs[i].id;
-      jsonModel.subgraphInterpolationType = calculatedGraph.subgraphs[i].interpolationType;
-      jsonModel.subgraphKnots = calculatedGraph.subgraphs[i].knots;
-      jsonModel.subgraphName = calculatedGraph.subgraphs[i].name;
-      jsonModel.xAxisName = calculatedGraph.xAxisName;
-      jsonModel.xAxisPoint = calculatedGraph.xAxisPoint;
-      jsonModel.yAxisName = calculatedGraph.yAxisName;
-      jsonModel.yAxisPoint = calculatedGraph.yAxisPoint;
-
-      graphToJsonModel.push(jsonModel);     
-    }
-
     const fileName = (this.imageFileToUpload ? this.imageFileToUpload.name.split('.')[0] : 'myfile') + '.json';
 
-    this.jsonFileService.saveJsonFromGraphData(graphToJsonModel, fileName);
+    this.jsonFileService.saveJsonFromGraphData(calculatedGraph, fileName);
   }
 
   toggleOrigin(event: MouseEvent) {
@@ -325,20 +314,17 @@ export class GraphComponent implements OnInit, OnDestroy {
   public widgetChangeEventHandler() {
     const eState = this.widget.getEditorState();
 
-    //if(this.currentActivePanelId != undefined)
-    //{
-      const widgetState = new WidgetState();
-      widgetState.subgraphId = this.currentActivePanelId;
-      widgetState.interpolationType = eState.interpolationMethod as InterpolationType;
-      widgetState.knots = eState.knots;
-      widgetState.coordinates = eState.coordinates;
-      widgetState.originPoint = eState.originPoint as Point;
-      widgetState.xAxisPoints = eState.xAxisPoints as Point[];
-      widgetState.yAxisPoints = eState.yAxisPoints as Point[];
-      widgetState.axisPointIndex = eState.axisPointIndex;
-  
-      this.graphFormService.setSubgraphData(widgetState);
-    //}
+    const widgetState = new WidgetState();
+    widgetState.subgraphId = this.currentActivePanelId;
+    widgetState.interpolationType = eState.interpolationMethod as InterpolationType;
+    widgetState.knots = eState.knots;
+    widgetState.coordinates = eState.coordinates;
+    widgetState.originPoint = eState.originPoint as Point;
+    widgetState.xAxisPoints = eState.xAxisPoints as Point[];
+    widgetState.yAxisPoints = eState.yAxisPoints as Point[];
+    widgetState.axisPointIndex = eState.axisPointIndex;
+
+    this.graphFormService.setSubgraphData(widgetState);
   }
 
   public widgetAxisPointSetEventHandler(index: number) {
