@@ -3,6 +3,7 @@ import { Subgraph, Graph } from '../../_models/_graph'
 import { Point, AxisPoint } from 'src/app/_models/_graph/point'
 import { CalculatedGraphModel } from 'src/app/_models/_graph/calculated-graph-model'
 import { JsonToGraphModel } from 'src/app/_models/_graph/json-to-graph-model';
+import { XAxisPoint } from 'src/app/_models/_graph/x-axis-point';
 
 @Injectable()
 export class GraphMathService {    
@@ -18,10 +19,6 @@ export class GraphMathService {
         calculatedGraph.xAxisPoints = this.setXAxisPoints(data);
         calculatedGraph.yAxisPoints = this.setYAxisPoints(data);
 
-
-        const xAxisPixelWeights = this.calculatePixelWeightsX(data.originPoint, data.xAxisPoints);
-        const yAxisPixelWeights = this.calculatePixelWeightsY(data.originPoint, data.yAxisPoints);
-
         for (let i = 0; i < data.subgraphs.length; i++) {
             const subgraph = new Subgraph();
       
@@ -34,10 +31,10 @@ export class GraphMathService {
             if(data.subgraphs[i].coordinates)
             {
                 subgraph.coordinates = this.calculateResultCoordinates(
-                    data,
-                    i,
-                    xAxisPixelWeights,
-                    yAxisPixelWeights);
+                    data.subgraphs[i].coordinates, 
+                    data.originPoint,
+                    calculatedGraph.xAxisPoints,
+                    calculatedGraph.yAxisPoints);
             }
 
             calculatedGraph.subgraphs.push(subgraph);     
@@ -61,29 +58,6 @@ export class GraphMathService {
             calculatedGraph.xAxisPoints = data.xAxisPoints;
             calculatedGraph.yAxisPoints = data.yAxisPoints;
             calculatedGraph.subgraphs = data.subgraphs;
-
-            // const xAxisPixelWeights = this.calculatePixelWeightsX(data.originPoint, data.xAxisPoints);
-            // const yAxisPixelWeights = this.calculatePixelWeightsY(data.originPoint, data.yAxisPoints);
-
-            // for (let i = 0; i < data.subgraphs.length; i++) {
-            //     const subgraph = new Subgraph();
-          
-            //     subgraph.id = data.subgraphs[i].id;
-            //     subgraph.interpolationType = data.subgraphs[i].interpolationType;
-            //     subgraph.name = data.subgraphs[i].name;
-            //     subgraph.knots = data.subgraphs[i].knots;
-                
-            //     if(data.subgraphs[i].coordinates)
-            //     {
-            //         subgraph.coordinates = this.calculateOriginCoordinates(
-            //             data,
-            //             i,
-            //             xAxisPixelWeights,
-            //             yAxisPixelWeights);
-            //     }
-    
-            //     calculatedGraph.subgraphs.push(subgraph);     
-            //   }
         }
 
         return calculatedGraph;
@@ -96,7 +70,7 @@ export class GraphMathService {
             xAxisPoints.push(x);
         });
 
-        xAxisPoints.sort(x=>x.xCoordinate);
+        xAxisPoints.sort((a,b)=>a.xCoordinate - b.xCoordinate);
 
         return xAxisPoints;
     }
@@ -108,7 +82,7 @@ export class GraphMathService {
             yAxisPoints.push(y);
         });
 
-        yAxisPoints.sort(y=>y.yCoordinate);
+        yAxisPoints.sort((a,b)=>a.yCoordinate - b.yCoordinate);
 
         return yAxisPoints;
     }
@@ -164,82 +138,98 @@ export class GraphMathService {
     }
 
     private calculateResultCoordinates(
-        data: Graph,
-        index: number,
-        xAxisPixelWeights: number[], 
-        yAxisPixelWeights: number[]) : Point[] 
+        coordinates: Point[],
+        originPoint: AxisPoint,
+        xAxisPointsSorted: AxisPoint[], 
+        yAxisPointsSorted: AxisPoint[]) : Point[] 
     {
         const result = Array<Point>();
 
-        const coordinates = data.subgraphs[index].coordinates;
-        const originPoint = data.originPoint;
-
         for (let i = 0; i < coordinates.length; i++) {
-            const xWeight = this.currentXWeight(data.xAxisPoints, xAxisPixelWeights, coordinates[i]);
-            const yWeight = this.currentYWeight(data.yAxisPoints, yAxisPixelWeights, coordinates[i]);
-            const xAxisIndex = this.currentXAxisIndex(data.xAxisPoints, coordinates[i]);
-            const yAxisIndex = this.currentYAxisIndex(data.yAxisPoints, coordinates[i]);
+            const xAxisIndex = this.currentXAxisIndex(xAxisPointsSorted, coordinates[i]);
+            const yAxisIndex = this.currentYAxisIndex(yAxisPointsSorted, coordinates[i]);
 
             let x = 0;
             let y = 0;
 
             if(xAxisIndex==0)
             {
-                x = (coordinates[i].x - originPoint.xCoordinate) * xWeight + originPoint.xValue;
+                if(xAxisPointsSorted[xAxisIndex].isLogScale 
+                    && xAxisPointsSorted[xAxisIndex].logBase)
+                {
+                    x = this.calculateXCoordinateOnLogScale(
+                        coordinates[i].x,
+                        originPoint,
+                        xAxisPointsSorted[xAxisIndex]);
+                }
+                else
+                {
+                    x = this.calculateXCoordinateOnLinearScale(
+                        coordinates[i].x,
+                        originPoint,
+                        xAxisPointsSorted[xAxisIndex]);
+                }
             }
             else
             {
-                x = (coordinates[i].x - data.xAxisPoints[xAxisIndex].xCoordinate) * xWeight + data.xAxisPoints[xAxisIndex].xValue;
+                if(xAxisPointsSorted[xAxisIndex].isLogScale 
+                    && xAxisPointsSorted[xAxisIndex].logBase)
+                {
+                    x = this.calculateXCoordinateOnLogScale(
+                        coordinates[i].x,
+                        xAxisPointsSorted[xAxisIndex-1],
+                        xAxisPointsSorted[xAxisIndex]);
+                }
+                else
+                {
+                    x = this.calculateXCoordinateOnLinearScale(
+                        coordinates[i].x,
+                        xAxisPointsSorted[xAxisIndex-1],
+                        xAxisPointsSorted[xAxisIndex]);
+                }
             }
 
             if(yAxisIndex==0)
             {
-                y = (coordinates[i].y - originPoint.yCoordinate) * yWeight + originPoint.yValue;
+                if(yAxisPointsSorted[yAxisIndex].isLogScale 
+                    && yAxisPointsSorted[yAxisIndex].logBase)
+                {
+                    y = this.calculateYCoordinateOnLogScale(
+                        coordinates[i].y,
+                        originPoint,
+                        yAxisPointsSorted[yAxisIndex]);
+                }
+                else
+                {
+                    y = this.calculateYCoordinateOnLinearScale(
+                        coordinates[i].y,
+                        originPoint,
+                        yAxisPointsSorted[yAxisIndex]);
+                }
             }
             else
             {
-                y = (coordinates[i].y - data.yAxisPoints[yAxisIndex].yCoordinate) * yWeight + data.yAxisPoints[yAxisIndex].yValue;
+                if(yAxisPointsSorted[yAxisIndex].isLogScale 
+                    && yAxisPointsSorted[yAxisIndex].logBase)
+                {
+                    y = this.calculateYCoordinateOnLogScale(
+                        coordinates[i].y,
+                        yAxisPointsSorted[yAxisIndex-1],
+                        yAxisPointsSorted[yAxisIndex]);
+                }
+                else
+                {
+                    y = this.calculateYCoordinateOnLinearScale(
+                        coordinates[i].y,
+                        yAxisPointsSorted[yAxisIndex-1],
+                        yAxisPointsSorted[yAxisIndex]);
+                }
             }
-
-            // const x = (coordinates[i].x - originPoint.xCoordinate) * xWeight + originPoint.xValue;
-            // const y = (coordinates[i].y - originPoint.yCoordinate) * yWeight + originPoint.yValue;
 
             result.push({x:x, y:y});
         }
 
         return result;
-    }
-    
-    private currentXWeight(xAxisPoints: AxisPoint[], xAxisPixelWeights: number[], coordinate: Point) {
-        let xWeight = 0;
-
-        for (let i = 0; i < xAxisPoints.length; i++) {
-            const point = xAxisPoints[i];
-            xWeight = xAxisPixelWeights[i];
-            
-            if(coordinate.x < point.xCoordinate)
-            {
-                break;
-            }
-        }
-
-        return xWeight;
-    }
-
-    private currentYWeight(yAxisPoints: AxisPoint[], yAxisPixelWeights: number[], coordinate: Point) {
-        let yWeight = 0;
-
-        for (let i = 0; i < yAxisPoints.length; i++) {
-            const point = yAxisPoints[i];
-            yWeight = yAxisPixelWeights[i];
-            
-            if(coordinate.y < point.yCoordinate)
-            {
-                break;
-            }
-        }
-
-        return yWeight;
     }
 
     private currentXAxisIndex(xAxisPoints: AxisPoint[], coordinate: Point) {
@@ -274,27 +264,27 @@ export class GraphMathService {
         return index;
     }
 
-    private calculateOriginCoordinates(
-        data: JsonToGraphModel,
-        index: number,
-        xAxisPixelWeights: number[], 
-        yAxisPixelWeights: number[]) : Point[] 
-    {
-        const result = Array<Point>();
+    calculateXCoordinateOnLogScale(tempXCoordinate: number, startScalePoint: AxisPoint, endScalePoint: AxisPoint): number {
+        return startScalePoint.xValue * Math.pow(
+            endScalePoint.xValue / startScalePoint.xValue, 
+            (tempXCoordinate - startScalePoint.xCoordinate) / (endScalePoint.xCoordinate - startScalePoint.xCoordinate)) 
+    }
 
-        const coordinates = data.subgraphs[index].coordinates;
-        const originPoint = data.originPoint;
+    calculateXCoordinateOnLinearScale(tempXCoordinate: number, startScalePoint: AxisPoint, endScalePoint: AxisPoint): number {
+        return startScalePoint.xValue +
+            (endScalePoint.xValue - startScalePoint.xValue) / (endScalePoint.xCoordinate - startScalePoint.xCoordinate) *
+            (tempXCoordinate - startScalePoint.xCoordinate)
+    }
 
-        for (let i = 0; i < coordinates.length; i++) {
-            let xWeight = this.currentXWeight(data.xAxisPoints, xAxisPixelWeights, coordinates[i]);
-            let yWeight = this.currentYWeight(data.yAxisPoints, yAxisPixelWeights, coordinates[i]);
+    calculateYCoordinateOnLogScale(tempYCoordinate: number, startScalePoint: AxisPoint, endScalePoint: AxisPoint): number {
+        return startScalePoint.yValue * Math.pow(
+            endScalePoint.yValue / startScalePoint.yValue, 
+            (tempYCoordinate - startScalePoint.yCoordinate) / (endScalePoint.yCoordinate - startScalePoint.yCoordinate)) 
+    }
 
-            const x = (coordinates[i].x - originPoint.xValue) / xWeight + originPoint.xCoordinate;
-            const y = (coordinates[i].y - originPoint.yValue) / yWeight + originPoint.yCoordinate;
-
-            result.push({x:x, y:y});
-        }
-
-        return result;
+    calculateYCoordinateOnLinearScale(tempYCoordinate: number, startScalePoint: AxisPoint, endScalePoint: AxisPoint): number {
+        return startScalePoint.yValue +
+            (endScalePoint.yValue - startScalePoint.yValue) / (endScalePoint.yCoordinate - startScalePoint.yCoordinate) *
+            (tempYCoordinate - startScalePoint.yCoordinate)
     }
 }
