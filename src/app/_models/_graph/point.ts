@@ -4,8 +4,10 @@ export interface Point {
 }
 
 export interface AxisPoint {
-    xCoordinate: number;
-    yCoordinate: number;
     xValue: number;
     yValue: number;
+    xCoordinate: number;
+    yCoordinate: number;
+    isLogScale: boolean;
+    logBase: number;
 }

@@ -12,8 +12,6 @@ import { Point, AxisPoint } from '../_models/_graph/point';
 import { GraphMathService } from '../_services/_graph/graph-math.service';
 import { JsonFileService } from '../_services/_file/json-file.service';
 import { JsonToGraphModel } from '../_models/_graph/json-to-graph-model';
-import { GraphToJsonModel } from '../_models/_graph/graph-to-json-model';
-import { Button } from 'protractor';
 
 
 @Component({
@@ -97,7 +95,6 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   addXAxisPoint() {
-    console.log(this.graphForm.value)
     this.graphFormService.addXAxisPoint();
   }
 
@@ -253,7 +250,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.widget.setEditorState(eState); 
   }
 
-  toggleYAxisPointButton(buttonsState: ButtonsState, index: number) {
+  toggleYAxisPointButton(event: MouseEvent, index: number) {
     if(this.axisButtonActive)
     {
       event.stopPropagation();

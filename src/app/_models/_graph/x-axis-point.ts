@@ -1,5 +1,7 @@
 export class XAxisPoint {
+    xValue: number;
     xCoordinate: number;
     yCoordinate: number;
-    xValue: number;
+    isLogScale: boolean;
+    logBase: number;
 }

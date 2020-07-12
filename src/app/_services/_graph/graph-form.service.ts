@@ -145,6 +145,8 @@ export class GraphFormService {
         xAxisPoint.xValue = calculatedGraph.xAxisPoints[i].xValue;
         xAxisPoint.xCoordinate = calculatedGraph.xAxisPoints[i].xCoordinate;
         xAxisPoint.yCoordinate = calculatedGraph.xAxisPoints[i].yCoordinate;
+        xAxisPoint.isLogScale = calculatedGraph.xAxisPoints[i].isLogScale;
+        xAxisPoint.logBase = calculatedGraph.xAxisPoints[i].logBase;
  
         currentXAxisPoints.push(
           this.fb.group(
@@ -165,6 +167,8 @@ export class GraphFormService {
         yAxisPoint.yValue = calculatedGraph.yAxisPoints[i].yValue;
         yAxisPoint.xCoordinate = calculatedGraph.yAxisPoints[i].xCoordinate;
         yAxisPoint.yCoordinate = calculatedGraph.yAxisPoints[i].yCoordinate;
+        yAxisPoint.isLogScale = calculatedGraph.yAxisPoints[i].isLogScale;
+        yAxisPoint.logBase = calculatedGraph.yAxisPoints[i].logBase;
  
         currentYAxisPoints.push(
           this.fb.group(
