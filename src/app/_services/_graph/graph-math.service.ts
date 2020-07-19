@@ -3,7 +3,6 @@ import { Subgraph, Graph } from '../../_models/_graph'
 import { Point, AxisPoint } from 'src/app/_models/_graph/point'
 import { CalculatedGraphModel } from 'src/app/_models/_graph/calculated-graph-model'
 import { JsonToGraphModel } from 'src/app/_models/_graph/json-to-graph-model';
-import { XAxisPoint } from 'src/app/_models/_graph/x-axis-point';
 
 @Injectable()
 export class GraphMathService {    
@@ -85,56 +84,6 @@ export class GraphMathService {
         yAxisPoints.sort((a,b)=>a.yCoordinate - b.yCoordinate);
 
         return yAxisPoints;
-    }
-
-    private calculatePixelWeightsX(originPoint: AxisPoint, xAxisPoints: AxisPoint[]) : number[] {
-        const pixelWeights = Array<number>();
-
-        for (let i = 0; i < xAxisPoints.length; i++) {
-            let value: number;
-
-            if(i==0)
-            {
-                value = (xAxisPoints[i].xValue - originPoint.xValue) / (xAxisPoints[i].xCoordinate - originPoint.xCoordinate);
-            }
-            else
-            {
-                value = (xAxisPoints[i].xValue - xAxisPoints[i-1].xValue) / (xAxisPoints[i].xCoordinate - xAxisPoints[i-1].xCoordinate);
-            }
-
-            pixelWeights.push(value);
-        }
-
-        // xAxisPoints.forEach(x => {
-        //     const value = (x.xValue - originPoint.xValue) / (x.xCoordinate - originPoint.xCoordinate);
-        //     pixelWeights.push(value);
-        // });
-       // return (xAxisPoint.xValue - originPoint.xValue) / (xAxisPoint.xCoordinate - originPoint.xCoordinate);
-
-        return pixelWeights;
-    }
-
-    private calculatePixelWeightsY(originPoint: AxisPoint, yAxisPoints: AxisPoint[]) : number[] {
-        const pixelWeights = Array<number>();
-
-        for (let i = 0; i < yAxisPoints.length; i++) {
-            let value: number;
-
-            if(i==0)
-            {
-                value = (yAxisPoints[i].yValue - originPoint.yValue) / (yAxisPoints[i].yCoordinate - originPoint.yCoordinate);
-            }
-            else
-            {
-                value = (yAxisPoints[i].yValue - yAxisPoints[i-1].yValue) / (yAxisPoints[i].yCoordinate - yAxisPoints[i-1].yCoordinate);
-            }
-
-            pixelWeights.push(value);
-        }
-
-        //return (yAxisPoint.yValue - originPoint.yValue) / (yAxisPoint.yCoordinate - originPoint.yCoordinate); 
-
-        return pixelWeights;
     }
 
     private calculateResultCoordinates(

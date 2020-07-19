@@ -57,6 +57,14 @@
           </ng-template>
           </ngb-panel>
       </ngb-accordion> 
+
+      <div class="d-flex pl-2 pr-2 mt-2">
+        <div class="custom-control custom-checkbox d-flex ">
+            <input type="checkbox" class="custom-control-input" id="viewAllSubgraphs" (change)="checkViewAllSubgraphs($event)">
+            <label class="custom-control-label" for="viewAllSubgraphs">View all subgraphs</label>                
+        </div>
+      </div>
+
       <span class="mt-2"></span>
       <button type="submit" class="btn-primary" (click)="saveGraph()" [disabled]="graphForm.invalid">Save As...</button>
       <div>

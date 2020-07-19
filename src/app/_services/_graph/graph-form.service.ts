@@ -11,6 +11,7 @@ import { XAxisPointForm } from 'src/app/_models/_forms/x-axis-point-form'
 import { XAxisPoint } from 'src/app/_models/_graph/x-axis-point'
 import { YAxisPoint } from 'src/app/_models/_graph/y-axis-point'
 import { YAxisPointForm } from 'src/app/_models/_forms/y-axis-point-form'
+import { SubgraphState } from 'src/app/_models/_graph/subgraph-state'
 
 @Injectable()
 export class GraphFormService {
@@ -80,6 +81,26 @@ export class GraphFormService {
     }
     
     return widgetState;
+  }
+
+  getSubgraphsState(subgraphs: Subgraph[]) : SubgraphState[]{
+    const states = new Array<SubgraphState>();
+
+    subgraphs.forEach(subgraph => {
+      const knots = new Array<Point>();
+      const interpolationMethod = subgraph.interpolationType;
+
+      if(subgraph.knots && subgraph.interpolationType)
+      {
+        subgraph.knots.forEach(point => {
+          knots.push({x:point.x, y:point.y});
+        });
+      }
+
+      states.push({knots: knots, interpolationMethod: interpolationMethod});
+    });
+
+    return states;
   }
 
   addSubgraph() {
