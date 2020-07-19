@@ -43,7 +43,7 @@
 
       <span class="mt-2"></span>   
       <button class="btn-primary" (click)="addSubgraph()">Add Subgraph</button>
-      <ngb-accordion class="d-flex flex-column" [closeOthers]="true" (panelChange)="toggleAccordian($event)">
+      <ngb-accordion #acc="ngbAccordion" class="d-flex flex-column" [closeOthers]="true" (panelChange)="toggleAccordian($event)">
           <ngb-panel class="d-flex" *ngFor="let subgraph of subgraphs?.controls; let i = index" id="{{i}}">
           <ng-template ngbPanelHeader let-opened="opened">
               <div class="d-flex align-items-center justify-content-between">
