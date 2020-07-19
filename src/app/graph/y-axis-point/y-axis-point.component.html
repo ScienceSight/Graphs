@@ -1,6 +1,6 @@
 <form [formGroup]="yAxisPointForm" class="d-flex flex-fill">
     <div class="input-group align-items-center">
-        <button type="button" id="btn_yAxis_{{index}}" class="btn btn-info" data-toggle="button" aria-pressed="false" (click)="tryToggle($event)">Y-axis</button>
+        <button type="button" id="btn_yAxis_{{index}}" class="btn btn-info" data-toggle="button" aria-pressed="false" (click)="tryToggle($event)">Set Y-axis</button>
         <input type="number" formControlName="yValue" class="form-control" placeholder="Y"/>
         <input type="number" hidden formControlName="xCoordinate" class="form-control" placeholder="X"/>
         <input type="number" hidden formControlName="yCoordinate" class="form-control" placeholder="Y"/>
