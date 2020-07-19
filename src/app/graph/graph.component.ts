@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core'
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core'
 import { FormGroup, FormArray, FormControl, Validators, FormBuilder } from '@angular/forms'
 import { GraphFormService } from '../_services/_graph/graph-form.service'
 import { Subscription } from 'rxjs'
 import * as FunctionCurveEditor from "../../function-curve-editor";
-import { NgbPanelChangeEvent } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPanelChangeEvent, NgbAccordion } from '@ng-bootstrap/ng-bootstrap';
 import { ButtonsState } from '../_models/_graph/buttons-state';
 import { Subgraph, Graph } from '../_models/_graph';
 import { InterpolationType } from '../_models/_graph/interpolation-type';
@@ -44,6 +44,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     xAxis: false,
     yAxis: false
   };
+
+  @ViewChild('acc') accordion: NgbAccordion;
 
   constructor(private graphFormService: GraphFormService,
               private graphMathService: GraphMathService,
@@ -190,8 +192,10 @@ export class GraphComponent implements OnInit, OnDestroy {
       eState.yAxisPoints.push({x:calculatedGraph.yAxisPoints[i].xCoordinate, y:calculatedGraph.yAxisPoints[i].yCoordinate});    
     }
 
-    if(this.currentActivePanelId == undefined
-      || this.currentActivePanelId >= calculatedGraph.subgraphs.length)
+    this.currentActivePanelId = 0;
+    this.accordion.activeIds = this.currentActivePanelId.toString();
+
+    if(this.currentActivePanelId >= calculatedGraph.subgraphs.length)
     {
       eState.knots = [];
       this.widget.setConnected(false);
@@ -200,6 +204,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     {
       eState.knots = calculatedGraph.subgraphs[this.currentActivePanelId].knots;
       eState.interpolationMethod = calculatedGraph.subgraphs[this.currentActivePanelId].interpolationType;
+      this.widget.setConnected(true);
     }
 
     this.widget.setEditorState(eState);  
