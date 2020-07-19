@@ -130,14 +130,35 @@ class FunctionPlotter {
       ctx.lineWidth = bold ? 3 : 1;
       ctx.strokeStyle = (isDragging || isPotential) ? "#EE5500" : isSelected ? "#0080FF" : "#CC4444";
       ctx.stroke();
-      ctx.restore(); }
+      ctx.restore(); 
+   }
 
-   private drawKnots() {
-      const knots = this.wctx.eState.knots;
+   private drawKnots(knots: Point[]) {
       for (let knotNdx = 0; knotNdx < knots.length; knotNdx++) 
       {
          this.drawKnot(knotNdx); 
       }
+   }
+
+   private drawAllKnots(knots: Point[]) {
+      const wctx = this.wctx;
+      wctx.iState.knotDragging = false;
+      wctx.iState.planeDragging = true;
+      wctx.iState.selectedKnotNdx = undefined;
+      wctx.iState.potentialKnotNdx = undefined;
+      
+      knots.forEach(knot=>{
+         const ctx = this.ctx;
+         const point = wctx.mapLogicalToCanvasCoordinates(knot);
+         const r = 4;
+         ctx.save();
+         ctx.beginPath();
+         ctx.arc(point.x, point.y, r, 0, 2 * Math.PI);
+         ctx.lineWidth = 1;
+         ctx.strokeStyle = "#CC4444";
+         ctx.stroke();
+         ctx.restore(); 
+      })
    }
 
    private drawOriginAxisPoint(lPoint: Point, color: string) {
@@ -239,7 +260,7 @@ class FunctionPlotter {
       this.drawXYGrid(true);
       this.drawXYGrid(false); }
 
-   private drawFunctionCurve (uniFunction: UniFunction, lxMin: number, lxMax: number) {
+   private drawFunctionCurve (uniFunction: UniFunction) {
       const wctx = this.wctx;
       const ctx = this.ctx;
       ctx.save();
@@ -276,15 +297,13 @@ class FunctionPlotter {
        wctx.image.width * wctx.getZoomFactor(true), wctx.image.height * wctx.getZoomFactor(false)); 
     }
 
-   private drawFunctionCurveFromKnots() {
+   private drawFunctionCurveFromKnots(knots: Point[], interpolationMethod: InterpolationMethod) {
       const wctx = this.wctx;
-      const knots = wctx.eState.knots;
       if (knots.length < 2 && !wctx.eState.extendedDomain) {
          return; }
-      const xMin = wctx.eState.extendedDomain ? -1E99 : knots[0].x;
-      const xMax = wctx.eState.extendedDomain ?  1E99 : knots[knots.length - 1].x;
-      const uniFunction = wctx.createInterpolationFunction();
-      this.drawFunctionCurve(uniFunction, xMin, xMax); }
+      const uniFunction = wctx.createInterpolationFunction(knots, interpolationMethod);
+      this.drawFunctionCurve(uniFunction); 
+   }
 
    public paint() {
       const wctx = this.wctx;
@@ -294,13 +313,46 @@ class FunctionPlotter {
       {
          this.drawGrid(); 
       }
+      this.drawAxisPoints();
+
+      if(wctx.eState.viewAllOptionActive)
+      {
+         this.drawAllCurves(); 
+      }
+      else
+      {
+         this.drawCurrentCurve(); 
+      }     
+   }
+   
+   drawCurrentCurve() {
+      const wctx = this.wctx;
+      const knots = wctx.eState.knots;
+      const interpolationMethod = wctx.eState.interpolationMethod;
+
       if(wctx.eState.interpolationMethod != "none")
       {
-         this.drawFunctionCurveFromKnots();
+         this.drawFunctionCurveFromKnots(knots, interpolationMethod);
       }
-      //this.drawFunctionCurveFromKnots();
-      this.drawKnots();
-      this.drawAxisPoints(); 
+      
+      this.drawKnots(knots); 
+   }
+
+   private drawAllCurves() {
+      const wctx = this.wctx;
+      const curvesState = wctx.eState.curvesState;
+
+      curvesState.forEach(curve => {
+         const knots = curve.knots;
+         const interpolationMethod = curve.interpolationMethod;
+
+         if(interpolationMethod != "none")
+         {
+            this.drawFunctionCurveFromKnots(knots, interpolationMethod);
+         }
+         
+         this.drawAllKnots(knots); 
+      })
    }
 }
 
@@ -349,11 +401,12 @@ class PointerController {
    public updateEStateCoordinates() {
       const wctx = this.wctx;
       const knots = this.wctx.eState.knots;
+      const interpolationMethod = this.wctx.eState.interpolationMethod;
       wctx.eState.coordinates = [];
 
       if(wctx.eState.interpolationMethod != "none" && knots.length > 1)
       {
-         const uniFunction = wctx.createInterpolationFunction();
+         const uniFunction = wctx.createInterpolationFunction(knots, interpolationMethod);
          const delta = 500;
          const step = 1 / delta;
          for (let t = 0; t < 1; t+=step) {
@@ -558,6 +611,10 @@ class PointerController {
       const wctx = this.wctx;
       if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.button != 0) {
          return; }
+      if(wctx.eState.viewAllOptionActive)
+      {
+         return;
+      }
       const cPoint = this.getCanvasCoordinatesFromEvent(event);
       if(!this.tryCreateAxisPoint(cPoint))
       {
@@ -786,12 +843,13 @@ class KeyboardController {
    private resample2 (n: number) {
       const wctx = this.wctx;
       const oldKnots = wctx.eState.knots;
+      const interpolationMethod = wctx.eState.interpolationMethod;
       if (oldKnots.length < 1) {
          void DialogManager.showMsg({msgText: "No knots."});
          return; }
       const xMin = oldKnots[0].x;
       const xMax = oldKnots[oldKnots.length - 1].x;
-      const uniFunction = wctx.createInterpolationFunction();
+      const uniFunction = wctx.createInterpolationFunction(oldKnots, interpolationMethod);
       const newKnots: Point[] = Array(n);
       for (let i = 0; i < n; i++) {
          const x = xMin + (xMax - xMin) / (n - 1) * i;
@@ -1130,15 +1188,15 @@ class WidgetContext {
       const pos = span * Math.ceil(p1 / span);                                     // position of first grid line in grid space units
       return {space, span, pos, decPow}; }
 
-   public createInterpolationFunction() : UniFunction {
-      const knots = this.eState.knots;
+   public createInterpolationFunction(knots: Point[], interpolationMethod: InterpolationMethod) : UniFunction {
       const n = knots.length;
       const xVals = new Float64Array(n);
       const yVals = new Float64Array(n);
       for (let i = 0; i < n; i++) {
          xVals[i] = knots[i].x;
          yVals[i] = knots[i].y; }
-      return createInterpolatorWithFallback(this.eState.interpolationMethod, xVals, yVals); }
+      return createInterpolatorWithFallback(interpolationMethod, xVals, yVals); 
+   }
 
    public requestRefresh() {
       if (this.animationFramePending || !this.isConnected) {
@@ -1180,6 +1238,11 @@ export {InterpolationMethod};
 export type MyHandler = () => void;
 export type MyAxisPointSetHandler = (index: number) => void;
 
+export interface CurveState {
+   knots: Point[];                                         // knot points for the interpolation
+   interpolationMethod: InterpolationMethod;               // optimal interpolation method
+}
+
 
 // Function curve editor state.
 export interface EditorState {
@@ -1201,6 +1264,8 @@ export interface EditorState {
    yAxisPoints:              Point[];                      // Y-Axis point
    axisPointIndex:           number;                       // X-Axis point or Y-Axis point index to change
    coordinates:              Point[];                      // Source coordinates
+   viewAllOptionActive:      boolean;                      // draw from knots arrays
+   curvesState:              CurveState[];                 // state of curves
 }
 
 // Clones and adds missing fields.
@@ -1224,6 +1289,8 @@ function cloneEditorState (eState: EditorState) : EditorState {
    eState2.yAxisPoints         = (eState.yAxisPoints ?? []).slice();
    eState2.axisPointIndex      = eState.axisPointIndex ?? 0;
    eState2.coordinates         = (eState.coordinates ?? []).slice();
+   eState2.viewAllOptionActive = eState.viewAllOptionActive ?? false;
+   eState2.curvesState         = (eState.curvesState ?? []).slice();
    return eState2; }
 
 //--- Widget -------------------------------------------------------------------
@@ -1299,7 +1366,7 @@ export class Widget {
    // Returns the current graph function.
    // The returned JavaScript function maps each x value to an y value.
    public getFunction() : (x: number) => number {
-      return this.wctx.createInterpolationFunction(); }
+      return this.wctx.createInterpolationFunction(this.wctx.eState.knots, this.wctx.eState.interpolationMethod); }
 
    // Returns the help text as an array.
    public getRawHelpText() : string[] {

@@ -22,7 +22,6 @@ import { JsonToGraphModel } from '../_models/_graph/json-to-graph-model';
 export class GraphComponent implements OnInit, OnDestroy {
   graphForm: FormGroup;
   graphFormSub: Subscription;
-  formInvalid: boolean = false;
   subgraphs: FormArray;
   xAxisPoints: FormArray;
   yAxisPoints: FormArray;
@@ -32,11 +31,9 @@ export class GraphComponent implements OnInit, OnDestroy {
   imageFileToUpload: File = null;
   jsonFileToUpload: File = null;
   
-  loading = false;
-  submitted = false;
-  returnUrl: string;
   error = '';
 
+  viewAllSubgraphsActive: boolean = false;
   axisButtonActive: boolean = false;
 
   currentActivePanelId: number = undefined;
@@ -206,6 +203,24 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
 
     this.widget.setEditorState(eState);  
+  }
+
+  checkViewAllSubgraphs(event: any)
+  {
+    if(event.currentTarget.checked)
+    {
+      this.viewAllSubgraphsActive = true;
+    }
+    else
+    {
+      this.viewAllSubgraphsActive = false;
+    }
+
+    const eState = this.widget.getEditorState();
+    const graphData = this.graphForm.value as Graph;
+    eState.curvesState = this.graphFormService.getSubgraphsState(graphData.subgraphs);
+    eState.viewAllOptionActive = this.viewAllSubgraphsActive;
+    this.widget.setEditorState(eState); 
   }
 
   saveGraph() {
