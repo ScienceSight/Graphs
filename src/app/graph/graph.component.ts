@@ -236,9 +236,13 @@ export class GraphComponent implements OnInit, OnDestroy {
     
     console.log(calculatedGraph)
 
+    const fixedGraph = calculatedGraph.toFixed(8);
+
+    console.log(fixedGraph)
+
     const fileName = (this.imageFileToUpload ? this.imageFileToUpload.name.split('.')[0] : 'myfile') + '.json';
 
-    this.jsonFileService.saveJsonFromGraphData(calculatedGraph, fileName);
+    this.jsonFileService.saveJsonFromGraphData(fixedGraph, fileName);
   }
 
   toggleOrigin(event: MouseEvent) {
