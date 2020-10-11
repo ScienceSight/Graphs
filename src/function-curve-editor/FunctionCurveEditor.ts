@@ -374,6 +374,7 @@ class PointerController {
    private zoomStartFactorY: number;
    private zoomX:            boolean;                      // true when zooming in X direction
    private zoomY:            boolean;                      // true when zooming in y direction
+   private mousePosition:    Point;                        // mouse position after mousemove event
 
    constructor (wctx: WidgetContext) {
       this.wctx = wctx;
@@ -382,6 +383,7 @@ class PointerController {
       wctx.canvas.addEventListener("pointerup",     this.pointerUpEventListener);
       wctx.canvas.addEventListener("pointercancel", this.pointerUpEventListener);
       wctx.canvas.addEventListener("pointermove",   this.pointerMoveEventListener);
+      wctx.canvas.addEventListener("mousemove",     this.mouseMoveEventListener);
       wctx.canvas.addEventListener("dblclick",      this.dblClickEventListener);
       wctx.canvas.addEventListener("wheel",         this.wheelEventListener); }
 
@@ -391,12 +393,26 @@ class PointerController {
       wctx.canvas.removeEventListener("pointerup",     this.pointerUpEventListener);
       wctx.canvas.removeEventListener("pointercancel", this.pointerUpEventListener);
       wctx.canvas.removeEventListener("pointermove",   this.pointerMoveEventListener);
+      wctx.canvas.removeEventListener("mousemove",     this.mouseMoveEventListener);
       wctx.canvas.removeEventListener("dblclick",      this.dblClickEventListener);
       wctx.canvas.removeEventListener("wheel",         this.wheelEventListener);
       this.releaseAllPointers(); }
 
    public processEscKey() {
       this.abortDragging(); }
+
+   public processSpaceClick() {
+      const wctx = this.wctx;
+      if(wctx.eState.viewAllOptionActive)
+      {
+         return;
+      }
+      const cPoint = wctx.mapViewportToCanvasCoordinates({x: this.mousePosition.x, y: this.mousePosition.y});
+      if(!this.tryCreateAxisPoint(cPoint))
+      {
+         this.createKnot(cPoint);
+      }
+   }
 
    public updateEStateCoordinates() {
       const wctx = this.wctx;
@@ -607,6 +623,10 @@ class PointerController {
       const cPoint = this.getCanvasCoordinates();
       this.createKnot(cPoint); }
 
+   private mouseMoveEventListener = (event: MouseEvent) => {
+      this.mousePosition = {x: event.clientX, y: event.clientY};
+   }
+
    private dblClickEventListener = (event: MouseEvent) => {
       const wctx = this.wctx;
       if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || event.button != 0) {
@@ -766,6 +786,10 @@ class KeyboardController {
          case "Escape": {
             wctx.pointerController.processEscKey();
             return true; }
+         case " ": {
+            wctx.pointerController.processSpaceClick();
+            return true;
+         }
          default: {
             return false; }}}
 
