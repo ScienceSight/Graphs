@@ -1,14 +1,14 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core'
-import { FormGroup, FormArray, FormControl, Validators, FormBuilder } from '@angular/forms'
+import { FormGroup, FormArray } from '@angular/forms'
 import { GraphFormService } from '../_services/_graph/graph-form.service'
 import { Subscription } from 'rxjs'
 import * as FunctionCurveEditor from "../../function-curve-editor";
 import { NgbPanelChangeEvent, NgbAccordion } from '@ng-bootstrap/ng-bootstrap';
 import { ButtonsState } from '../_models/_graph/buttons-state';
-import { Subgraph, Graph } from '../_models/_graph';
+import { Graph } from '../_models/_graph';
 import { InterpolationType } from '../_models/_graph/interpolation-type';
 import { WidgetState } from '../_models/_widget/widget-state';
-import { Point, AxisPoint } from '../_models/_graph/point';
+import { Point } from '../_models/_graph/point';
 import { GraphMathService } from '../_services/_graph/graph-math.service';
 import { JsonFileService } from '../_services/_file/json-file.service';
 import { JsonToGraphModel } from '../_models/_graph/json-to-graph-model';
@@ -147,6 +147,14 @@ export class GraphComponent implements OnInit, OnDestroy {
     const base64textString = btoa(binaryString);
     this.widget.setConnected(true);
     this.widget.setWidgetContextImage(base64textString, this.imageFileToUpload.type);
+    
+    const length = this.graphFormService.getSubgraphsLength();
+    if(this.currentActivePanelId == undefined
+      && length == 1)
+    {
+      this.currentActivePanelId = 0;
+      this.accordion.activeIds = this.currentActivePanelId.toString();
+    }
   }
 
   handleJsonFileInput(files: FileList) {
