@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core'
+import { saveAs } from 'file-saver';
 import { JsonToGraphModel } from 'src/app/_models/_graph/json-to-graph-model';
 import { CalculatedGraphModel } from 'src/app/_models/_graph/calculated-graph-model';
 
@@ -10,8 +11,7 @@ export class JsonFileService {
   public saveJsonFromGraphData(data: CalculatedGraphModel, fileName: string) {
       const jsonString = JSON.stringify(data);
       var blob = new Blob([jsonString], {type: "application/json;charset=utf-8"})
-      var FileSaver = require('file-saver');
-      FileSaver.saveAs(blob, fileName);
+      saveAs(blob, fileName);
     }
 
   public loadGraphDataFromJsonString(data: string) : JsonToGraphModel {
