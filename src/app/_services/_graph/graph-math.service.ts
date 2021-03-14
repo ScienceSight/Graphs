@@ -11,7 +11,8 @@ export class GraphMathService {
     public calculateResultGraph(data: Graph) : CalculatedGraphModel {
         const calculatedGraph = new CalculatedGraphModel();
 
-        calculatedGraph.subgraphs = Array<Subgraph>();       
+        calculatedGraph.subgraphs = Array<Subgraph>();    
+        calculatedGraph.graphName = data.graphName;   
         calculatedGraph.xAxisName = data.xAxisName;
         calculatedGraph.yAxisName = data.yAxisName;
         calculatedGraph.originPoint = data.originPoint;
@@ -51,6 +52,7 @@ export class GraphMathService {
 
         if(data)
         {
+            calculatedGraph.graphName = data.graphName;
             calculatedGraph.xAxisName = data.xAxisName;
             calculatedGraph.yAxisName = data.yAxisName;
             calculatedGraph.originPoint = data.originPoint;
