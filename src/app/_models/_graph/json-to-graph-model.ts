@@ -1,8 +1,8 @@
-import { AxisPoint, Point } from './point';
-import { InterpolationType } from './interpolation-type';
+import { AxisPoint } from './point';
 import { Subgraph } from './subgraph';
 
 export class JsonToGraphModel{
+    graphName: string;
     xAxisName: string;
     yAxisName: string;
     originPoint: AxisPoint;

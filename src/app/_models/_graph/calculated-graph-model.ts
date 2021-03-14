@@ -2,6 +2,7 @@ import { Subgraph } from "./subgraph";
 import { AxisPoint, Point } from './point';
 
 export class CalculatedGraphModel{
+    graphName: string;
     xAxisName: string;
     yAxisName: string;
     originPoint: AxisPoint;
@@ -13,6 +14,7 @@ export class CalculatedGraphModel{
     {
         const calculatedGraph = new CalculatedGraphModel();
 
+        calculatedGraph.graphName = this.graphName;
         calculatedGraph.xAxisName = this.xAxisName;
         calculatedGraph.yAxisName = this.yAxisName;
 

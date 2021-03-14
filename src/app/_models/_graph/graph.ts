@@ -1,9 +1,8 @@
 import { Subgraph } from "./subgraph";
 import { AxisPoint } from './point';
-import { XAxisPoint } from './x-axis-point';
-import { YAxisPoint } from './y-axis-point';
 
 export class Graph{
+    graphName: string;
     xAxisName: string;
     yAxisName: string;
     originPoint: AxisPoint;

@@ -14,7 +14,12 @@
         <label class="custom-file-label" for="customFile">Choose .json file</label>
       </div>
       <span class="mt-2"></span>
+      <div>
+        <textarea formControlName="graphName" class="form-control" placeholder="Graph name"></textarea>
+      </div>
+      <span class="mt-2"></span>
       <input formControlName="xAxisName" class="form-control" placeholder="X-axis name" required>
+      <span class="mt-2"></span>
       <input formControlName="yAxisName" class="form-control" placeholder="Y-axis name" required>
       <span class="mt-2"></span>
       <div class="input-group" formGroupName="originPoint">
@@ -72,5 +77,4 @@
       </div>
     </form>
   </div>
-  <!-- <div *ngIf="error" class="alert alert-danger mt-3 mb-0">{{error}}</div> -->
 </div>
