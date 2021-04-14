@@ -137,6 +137,11 @@ export class GraphFormService {
     const currentGraph = this.graphForm.getValue();
     currentGraph.reset();
     
+    if(calculatedGraph.graphName)
+    {
+      currentGraph.controls['graphName'].setValue(calculatedGraph.graphName);
+    }
+
     if(calculatedGraph.xAxisName)
     {
       currentGraph.controls['xAxisName'].setValue(calculatedGraph.xAxisName);
