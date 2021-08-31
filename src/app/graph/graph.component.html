@@ -15,7 +15,10 @@
       </div>
       <span class="mt-2"></span>
       <div>
-        <textarea formControlName="graphName" class="form-control" placeholder="Graph name"></textarea>
+        <textarea formControlName="graphName" class="form-control" placeholder="Graph name" [ngClass]="{'is-invalid':graphForm.get('graphName').invalid}" pattern="[\x00-\x7F]+"></textarea>
+        <div class="invalid-feedback">
+          Graph name must contain only ASCII characters.
+        </div>
       </div>
       <span class="mt-2"></span>
       <input formControlName="xAxisName" class="form-control" placeholder="X-axis name" required>
