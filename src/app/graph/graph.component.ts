@@ -11,8 +11,9 @@ import { WidgetState } from '../_models/_widget/widget-state';
 import { Point } from '../_models/_graph/point';
 import { GraphMathService } from '../_services/_graph/graph-math.service';
 import { JsonFileService } from '../_services/_file/json-file.service';
+import { HttpService } from '../_services/_http/http.service';
 import { JsonToGraphModel } from '../_models/_graph/json-to-graph-model';
-
+import { CalculatedGraphModel } from '../_models/_graph/calculated-graph-model';
 
 @Component({
   selector: 'graph',
@@ -30,6 +31,10 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   imageFileToUpload: File = null;
   jsonFileToUpload: File = null;
+
+  imageFileUrl = "";
+  jsonFileUrl = "";
+  uploadGraphDataUrl = "";
   
   error = '';
 
@@ -49,7 +54,8 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   constructor(private graphFormService: GraphFormService,
               private graphMathService: GraphMathService,
-              private jsonFileService: JsonFileService) { }
+              private jsonFileService: JsonFileService,
+              private httpService: HttpService) { }
 
   ngOnInit() {
     this.graphFormSub = this.graphFormService.graphForm$
@@ -135,11 +141,28 @@ export class GraphComponent implements OnInit, OnDestroy {
 
     if (files && this.imageFileToUpload) {
       var reader = new FileReader();
-
       reader.onload = this._handleReaderLoadedImage.bind(this);
-
       reader.readAsBinaryString(this.imageFileToUpload);
     }
+  }
+
+  handleImageFileUrl(url: string) {
+    this.httpService.getFile(url)
+      .subscribe({
+        next: (blob: Blob) => {
+          const blobType = 'image/png';
+          if (blob.type == blobType) {
+            this.imageFileToUpload = new File([blob], url.split('\/').pop(), { type: blobType });
+            var reader = new FileReader();
+            reader.onload = this._handleReaderLoadedImage.bind(this);
+            reader.readAsBinaryString(this.imageFileToUpload);
+          }
+          else {
+            this.error = 'Wrong file type';
+          }
+        },
+        error: error => this.error = error.message,
+      });
   }
 
   _handleReaderLoadedImage(readerEvt) {
@@ -162,11 +185,28 @@ export class GraphComponent implements OnInit, OnDestroy {
 
     if (files && this.jsonFileToUpload) {
       var reader = new FileReader();
-
       reader.onload = this._handleReaderLoadedJson.bind(this);
-
       reader.readAsText(this.jsonFileToUpload);
     }
+  }
+
+  handleJsonFileUrl(url: string) {
+    this.httpService.getFile(url)
+      .subscribe({
+        next: (blob: Blob) => {
+          const blobType = 'application/json';
+          if (blob.type == blobType) {
+            this.jsonFileToUpload = new File([blob], url.split('\/').pop(), { type: blobType });
+            var reader = new FileReader();
+            reader.onload = this._handleReaderLoadedJson.bind(this);
+            reader.readAsText(this.jsonFileToUpload);
+          }
+          else {
+            this.error = 'Wrong file type';
+          }
+        },
+        error: error => this.error = error.message,
+      });
   }
 
   _handleReaderLoadedJson(readerEvt) {
@@ -175,9 +215,17 @@ export class GraphComponent implements OnInit, OnDestroy {
 
     try {
       jsonToGraphModel = this.jsonFileService.loadGraphDataFromJsonString(jsonData);
-      console.log(jsonToGraphModel);
+
+      if (jsonToGraphModel == undefined
+        || jsonToGraphModel.subgraphs == undefined
+        || jsonToGraphModel.originPoint == undefined
+        || jsonToGraphModel.xAxisPoints == undefined
+        || jsonToGraphModel.yAxisPoints == undefined)
+      {
+        throw new Error('Invalid json structure.');
+      }
     } catch (error) {
-      this.error = error;
+      this.error = error.message;
       throw error;
     }
 
@@ -237,20 +285,34 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   saveGraph() {
-    console.log(this.graphForm.value)
+    const data = this.getFixedCalculatedGraph();
+    const fileName = (this.imageFileToUpload ? this.imageFileToUpload.name.split('.')[0] : 'myfile') + '.json';   
+    this.jsonFileService.saveJsonFromGraphData(data, fileName);
+  }
 
+  uploadGraph(url: string) {
+    const data = this.getFixedCalculatedGraph();
+    this.httpService.postGraphData(url, data)
+      .subscribe({
+        next: (response: any) => {
+          if (response.error) {
+            this.error = response.error;
+          }
+          else if (response.redirect) {
+            window.location.href = response.redirect;
+          }
+          else {
+            this.error = 'Invalid response from upload endpoint.';
+          }
+        },
+        error: error => this.error = error.message,
+      });
+  }
+
+  getFixedCalculatedGraph() : CalculatedGraphModel {
     const graphData = this.graphForm.value as Graph;
     const calculatedGraph = this.graphMathService.calculateResultGraph(graphData);
-    
-    console.log(calculatedGraph)
-
-    const fixedGraph = calculatedGraph.toFixed(8);
-
-    console.log(fixedGraph)
-
-    const fileName = (this.imageFileToUpload ? this.imageFileToUpload.name.split('.')[0] : 'myfile') + '.json';
-
-    this.jsonFileService.saveJsonFromGraphData(fixedGraph, fileName);
+    return calculatedGraph.toFixed(8);
   }
 
   toggleOrigin(event: MouseEvent) {
