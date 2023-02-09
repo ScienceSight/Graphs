@@ -109,19 +109,10 @@
       </div>
 
       <span class="mt-5"></span>
-      <button type="submit" class="btn-primary" (click)="saveGraph()" [disabled]="graphForm.invalid">Save locally</button>
+      <button type="submit" class="btn btn-light" (click)="saveGraphLocally()" [disabled]="graphForm.invalid" title="Save the result data to local machine">Save Locally</button>
       
       <span class="mt-1"></span>
-      <div class="input-group">
-        <input class="form-control" [(ngModel)]="uploadGraphDataUrl" #uploadUrl="ngModel" [ngModelOptions]="{standalone: true}"
-            [ngClass]="{'is-invalid':uploadUrl.invalid}" placeholder="Save endpoint url" title="The endpoint url to save the result data"
-            pattern="(https?:\/\/.*)" />
-        <span class="ml-2"></span>
-        <button class="btn btn-light" (click)="uploadGraph(uploadGraphDataUrl)" [disabled]="!uploadGraphDataUrl || uploadUrl.invalid || graphForm.invalid">Upload</button>
-        <div class="invalid-feedback">
-          Invalid endpoint url.
-        </div>
-      </div>
+      <button class="btn btn-light" (click)="saveGraphRemotely()" [disabled]="graphForm.invalid" title="Send result data to an endpoint from the config">Save Remotely</button>
       
       <span class="mt-1"></span>
       <div>

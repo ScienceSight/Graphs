@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 
@@ -17,6 +17,7 @@ import { JsonFileService } from './_services/_file/json-file.service';
 import { HttpService } from './_services/_http/http.service';
 import { XAxisPointComponent } from './graph/x-axis-point/x-axis-point.component';
 import { YAxisPointComponent } from './graph/y-axis-point/y-axis-point.component';
+import { ConfigurationService } from './_services/_config/configuration.service';
 
 @NgModule({
   declarations: [
@@ -36,6 +37,12 @@ import { YAxisPointComponent } from './graph/y-axis-point/y-axis-point.component
     BrowserAnimationsModule
   ],
   providers: [
+    {
+      provide : APP_INITIALIZER,
+      multi : true,
+      deps : [ConfigurationService],
+      useFactory : (config : ConfigurationService) => () => config.loadAppConfig()
+    },
     GraphFormService,
     GraphMathService,
     JsonFileService,

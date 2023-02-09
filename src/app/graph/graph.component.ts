@@ -14,6 +14,8 @@ import { JsonFileService } from '../_services/_file/json-file.service';
 import { HttpService } from '../_services/_http/http.service';
 import { JsonToGraphModel } from '../_models/_graph/json-to-graph-model';
 import { CalculatedGraphModel } from '../_models/_graph/calculated-graph-model';
+import { ActivatedRoute } from '@angular/router';
+import { ConfigurationService } from '../_services/_config/configuration.service';
 
 @Component({
   selector: 'graph',
@@ -34,7 +36,6 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   imageFileUrl = "";
   jsonFileUrl = "";
-  uploadGraphDataUrl = "";
   
   error = '';
 
@@ -55,33 +56,48 @@ export class GraphComponent implements OnInit, OnDestroy {
   constructor(private graphFormService: GraphFormService,
               private graphMathService: GraphMathService,
               private jsonFileService: JsonFileService,
-              private httpService: HttpService) { }
+              private httpService: HttpService,
+              private route: ActivatedRoute,
+              private configuration: ConfigurationService) { }
 
   ngOnInit() {
     this.graphFormSub = this.graphFormService.graphForm$
       .subscribe(graph => {
-          this.graphForm = graph
-          this.subgraphs = this.graphForm.get('subgraphs') as FormArray
-          this.xAxisPoints = this.graphForm.get('xAxisPoints') as FormArray
-          this.yAxisPoints = this.graphForm.get('yAxisPoints') as FormArray
-        });
+        this.graphForm = graph
+        this.subgraphs = this.graphForm.get('subgraphs') as FormArray
+        this.xAxisPoints = this.graphForm.get('xAxisPoints') as FormArray
+        this.yAxisPoints = this.graphForm.get('yAxisPoints') as FormArray
+      });
        
-       const initialEditorState = <FunctionCurveEditor.EditorState>{
-          knots:          [],
-          xMin:           0,
-          xMax:           1000,
-          yMin:           0,
-          yMax:           700,
-          extendedDomain: false,
-          gridEnabled:    false,
-          interpolationMethod: "bSpline"
-       };
+    const initialEditorState = <FunctionCurveEditor.EditorState>{
+      knots:          [],
+      xMin:           0,
+      xMax:           1000,
+      yMin:           0,
+      yMax:           700,
+      extendedDomain: false,
+      gridEnabled:    false,
+      interpolationMethod: "bSpline"
+    };
 
-       this.graphFormService.addSubgraph()
-       this.graphFormService.addXAxisPoint()
-       this.graphFormService.addYAxisPoint()
+    this.graphFormService.addSubgraph()
+    this.graphFormService.addXAxisPoint()
+    this.graphFormService.addYAxisPoint()
    
-       this.startup(initialEditorState);
+    this.startup(initialEditorState);
+
+    this.route.queryParams.subscribe(params => {
+      this.imageFileUrl = params['png'];
+      this.jsonFileUrl = params['json'];
+      if(this.imageFileUrl)
+      {
+        this.handleImageFileUrl(this.imageFileUrl);
+      }
+      if(this.jsonFileUrl)
+      {
+        this.handleJsonFileUrl(this.jsonFileUrl);
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -284,13 +300,19 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.widget.setEditorState(eState); 
   }
 
-  saveGraph() {
+  saveGraphLocally() {
     const data = this.getFixedCalculatedGraph();
     const fileName = (this.imageFileToUpload ? this.imageFileToUpload.name.split('.')[0] : 'myfile') + '.json';   
     this.jsonFileService.saveJsonFromGraphData(data, fileName);
   }
 
-  uploadGraph(url: string) {
+  saveGraphRemotely() {
+    const url = this.configuration.getValue('postGraphDataUrl');
+    if (!url)
+    {
+      this.error = 'Empty remote endpoint url.';
+      return;
+    }
     const data = this.getFixedCalculatedGraph();
     this.httpService.postGraphData(url, data)
       .subscribe({
