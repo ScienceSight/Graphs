@@ -1,12 +1,12 @@
-import { FormControl, Validators } from '@angular/forms'
+import { UntypedFormControl, Validators } from '@angular/forms'
 import { XAxisPoint } from '../_graph/x-axis-point'
 
 export class XAxisPointForm {
-  xValue = new FormControl()
-  xCoordinate = new FormControl()
-  yCoordinate = new FormControl()
-  isLogScale = new FormControl()
-  logBase = new FormControl()
+  xValue = new UntypedFormControl()
+  xCoordinate = new UntypedFormControl()
+  yCoordinate = new UntypedFormControl()
+  isLogScale = new UntypedFormControl()
+  logBase = new UntypedFormControl()
 
   constructor(
     xAxisPoint: XAxisPoint

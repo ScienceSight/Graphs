@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core'
-import { FormGroup, FormArray } from '@angular/forms'
+import { UntypedFormGroup, UntypedFormArray } from '@angular/forms'
 import { GraphFormService } from '../_services/_graph/graph-form.service'
 import { Subscription } from 'rxjs'
 import * as FunctionCurveEditor from "../../function-curve-editor";
@@ -23,11 +23,11 @@ import { ConfigurationService } from '../_services/_config/configuration.service
   styleUrls: ['./graph.component.css']
 })
 export class GraphComponent implements OnInit, OnDestroy {
-  graphForm: FormGroup;
+  graphForm: UntypedFormGroup;
   graphFormSub: Subscription;
-  subgraphs: FormArray;
-  xAxisPoints: FormArray;
-  yAxisPoints: FormArray;
+  subgraphs: UntypedFormArray;
+  xAxisPoints: UntypedFormArray;
+  yAxisPoints: UntypedFormArray;
 
   widget: FunctionCurveEditor.Widget;
 
@@ -64,9 +64,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.graphFormSub = this.graphFormService.graphForm$
       .subscribe(graph => {
         this.graphForm = graph
-        this.subgraphs = this.graphForm.get('subgraphs') as FormArray
-        this.xAxisPoints = this.graphForm.get('xAxisPoints') as FormArray
-        this.yAxisPoints = this.graphForm.get('yAxisPoints') as FormArray
+        this.subgraphs = this.graphForm.get('subgraphs') as UntypedFormArray
+        this.xAxisPoints = this.graphForm.get('xAxisPoints') as UntypedFormArray
+        this.yAxisPoints = this.graphForm.get('yAxisPoints') as UntypedFormArray
       });
        
     const initialEditorState = <FunctionCurveEditor.EditorState>{

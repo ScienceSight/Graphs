@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, ChangeDetectionStrategy, EventEmitter } from '@angular/core'
-import { FormGroup } from '@angular/forms'
+import { UntypedFormGroup } from '@angular/forms'
 
 @Component({
   selector: 'y-axis-point',
@@ -8,7 +8,7 @@ import { FormGroup } from '@angular/forms'
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class YAxisPointComponent implements OnInit {
-  @Input() yAxisPointForm: FormGroup
+  @Input() yAxisPointForm: UntypedFormGroup
   @Input() index: number
   @Output() deleteYAxisPoint: EventEmitter<number> = new EventEmitter()
   @Output() toggleYAxisPointButton: EventEmitter<MouseEvent> = new EventEmitter()

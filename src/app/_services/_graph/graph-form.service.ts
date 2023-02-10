@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core'
 import { Observable, BehaviorSubject } from 'rxjs'
-import { FormGroup, FormBuilder, FormArray, Validators, Form, AbstractControl } from '@angular/forms'
+import { UntypedFormGroup, UntypedFormBuilder, UntypedFormArray, Validators, Form, AbstractControl } from '@angular/forms'
 import { Subgraph, Graph } from '../../_models/_graph'
 import { SubgraphForm, GraphForm } from '../../_models/_forms'
 import { InterpolationType } from 'src/app/_models/_graph/interpolation-type'
@@ -16,11 +16,11 @@ import { SubgraphState } from 'src/app/_models/_graph/subgraph-state'
 @Injectable()
 export class GraphFormService {
   private graphForm: BehaviorSubject<
-    FormGroup | undefined
+    UntypedFormGroup | undefined
   > = new BehaviorSubject(this.fb.group(new GraphForm(new Graph())))
-  graphForm$: Observable<FormGroup> = this.graphForm.asObservable()
+  graphForm$: Observable<UntypedFormGroup> = this.graphForm.asObservable()
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: UntypedFormBuilder) {}
 
    setSubgraphData(state: WidgetState) {
     this.setAxisPoints(state);
@@ -28,8 +28,8 @@ export class GraphFormService {
     if(state.subgraphId != undefined)
     {
       const currentGraph = this.graphForm.getValue()
-      const currentSubgraphs = currentGraph.get('subgraphs') as FormArray
-      const subgraph = currentSubgraphs.get(state.subgraphId.toString()) as FormGroup;
+      const currentSubgraphs = currentGraph.get('subgraphs') as UntypedFormArray
+      const subgraph = currentSubgraphs.get(state.subgraphId.toString()) as UntypedFormGroup;
       if(subgraph)
       {
         subgraph.controls['knots'].setValue(state.knots);
@@ -40,18 +40,18 @@ export class GraphFormService {
   
   setAxisPoints(state: WidgetState) {
     const currentGraph = this.graphForm.getValue()
-    const currentXAxisPoints = currentGraph.get('xAxisPoints') as FormArray
-    const currentYAxisPoints = currentGraph.get('yAxisPoints') as FormArray
+    const currentXAxisPoints = currentGraph.get('xAxisPoints') as UntypedFormArray
+    const currentYAxisPoints = currentGraph.get('yAxisPoints') as UntypedFormArray
 
     const index = state.axisPointIndex;
 
-    const xAxisPoint = currentXAxisPoints.get(index.toString()) as FormGroup;
-    const yAxisPoint = currentYAxisPoints.get(index.toString()) as FormGroup;
+    const xAxisPoint = currentXAxisPoints.get(index.toString()) as UntypedFormGroup;
+    const yAxisPoint = currentYAxisPoints.get(index.toString()) as UntypedFormGroup;
     
     if(state.originPoint)
     {
-      (currentGraph.controls['originPoint'] as FormGroup).controls['xCoordinate'].setValue(state.originPoint.x);
-      (currentGraph.controls['originPoint'] as FormGroup).controls['yCoordinate'].setValue(state.originPoint.y);  
+      (currentGraph.controls['originPoint'] as UntypedFormGroup).controls['xCoordinate'].setValue(state.originPoint.x);
+      (currentGraph.controls['originPoint'] as UntypedFormGroup).controls['yCoordinate'].setValue(state.originPoint.y);  
     }
 
     if(xAxisPoint && state.xAxisPoints[index])
@@ -71,8 +71,8 @@ export class GraphFormService {
     const widgetState = new WidgetState();
 
     const currentGraph = this.graphForm.getValue()
-    const currentSubgraphs = currentGraph.get('subgraphs') as FormArray
-    const subgraph = currentSubgraphs.get(currentActivePanelId.toString()) as FormGroup;
+    const currentSubgraphs = currentGraph.get('subgraphs') as UntypedFormArray
+    const subgraph = currentSubgraphs.get(currentActivePanelId.toString()) as UntypedFormGroup;
 
     if(subgraph)
     {
@@ -105,7 +105,7 @@ export class GraphFormService {
 
   addSubgraph() {
     const currentGraph = this.graphForm.getValue()
-    const currentSubgraphs = currentGraph.get('subgraphs') as FormArray
+    const currentSubgraphs = currentGraph.get('subgraphs') as UntypedFormArray
 
     currentSubgraphs.push(
       this.fb.group(
@@ -118,7 +118,7 @@ export class GraphFormService {
 
   deleteSubgraph(i: number) {
     const currentGraph = this.graphForm.getValue()
-    const currentSubgraphs = currentGraph.get('subgraphs') as FormArray
+    const currentSubgraphs = currentGraph.get('subgraphs') as UntypedFormArray
 
     currentSubgraphs.removeAt(i)
 
@@ -127,7 +127,7 @@ export class GraphFormService {
 
   getSubgraphsLength() {
     const currentGraph = this.graphForm.getValue()
-    const currentSubgraphs = currentGraph.get('subgraphs') as FormArray
+    const currentSubgraphs = currentGraph.get('subgraphs') as UntypedFormArray
     
     return currentSubgraphs.length;
   }
@@ -154,15 +154,15 @@ export class GraphFormService {
 
     if(calculatedGraph.originPoint)
     {
-      (currentGraph.controls['originPoint'] as FormGroup).controls['xValue'].setValue(calculatedGraph.originPoint.xValue);
-      (currentGraph.controls['originPoint'] as FormGroup).controls['yValue'].setValue(calculatedGraph.originPoint.yValue);
-      (currentGraph.controls['originPoint'] as FormGroup).controls['xCoordinate'].setValue(calculatedGraph.originPoint.xCoordinate);
-      (currentGraph.controls['originPoint'] as FormGroup).controls['yCoordinate'].setValue(calculatedGraph.originPoint.yCoordinate);  
+      (currentGraph.controls['originPoint'] as UntypedFormGroup).controls['xValue'].setValue(calculatedGraph.originPoint.xValue);
+      (currentGraph.controls['originPoint'] as UntypedFormGroup).controls['yValue'].setValue(calculatedGraph.originPoint.yValue);
+      (currentGraph.controls['originPoint'] as UntypedFormGroup).controls['xCoordinate'].setValue(calculatedGraph.originPoint.xCoordinate);
+      (currentGraph.controls['originPoint'] as UntypedFormGroup).controls['yCoordinate'].setValue(calculatedGraph.originPoint.yCoordinate);  
     }
 
     if(calculatedGraph.xAxisPoints)
     {
-      const currentXAxisPoints = currentGraph.get('xAxisPoints') as FormArray
+      const currentXAxisPoints = currentGraph.get('xAxisPoints') as UntypedFormArray
       currentXAxisPoints.clear();
 
       for (let i = 0; i < calculatedGraph.xAxisPoints.length; i++) {
@@ -184,7 +184,7 @@ export class GraphFormService {
 
     if(calculatedGraph.yAxisPoints)
     {
-      const currentYAxisPoints = currentGraph.get('yAxisPoints') as FormArray
+      const currentYAxisPoints = currentGraph.get('yAxisPoints') as UntypedFormArray
       currentYAxisPoints.clear();
 
       for (let i = 0; i < calculatedGraph.yAxisPoints.length; i++) {
@@ -206,7 +206,7 @@ export class GraphFormService {
 
     if(calculatedGraph.subgraphs)
     {
-      const currentSubgraphs = currentGraph.get('subgraphs') as FormArray
+      const currentSubgraphs = currentGraph.get('subgraphs') as UntypedFormArray
       currentSubgraphs.clear();
 
       for (let i = 0; i < calculatedGraph.subgraphs.length; i++) {
@@ -232,7 +232,7 @@ export class GraphFormService {
 
   addXAxisPoint() {
     const currentGraph = this.graphForm.getValue()
-    const currentXAxisPoints = currentGraph.get('xAxisPoints') as FormArray
+    const currentXAxisPoints = currentGraph.get('xAxisPoints') as UntypedFormArray
 
     currentXAxisPoints.push(
       this.fb.group(
@@ -247,7 +247,7 @@ export class GraphFormService {
 
   addYAxisPoint() {
     const currentGraph = this.graphForm.getValue()
-    const currentYAxisPoints = currentGraph.get('yAxisPoints') as FormArray
+    const currentYAxisPoints = currentGraph.get('yAxisPoints') as UntypedFormArray
 
     currentYAxisPoints.push(
       this.fb.group(
@@ -262,7 +262,7 @@ export class GraphFormService {
 
   deleteXAxisPoint(i: number) {
     const currentGraph = this.graphForm.getValue()
-    const currentXAxisPoints = currentGraph.get('xAxisPoints') as FormArray
+    const currentXAxisPoints = currentGraph.get('xAxisPoints') as UntypedFormArray
 
     currentXAxisPoints.removeAt(i)
 
@@ -271,7 +271,7 @@ export class GraphFormService {
 
   deleteYAxisPoint(i: number) {
     const currentGraph = this.graphForm.getValue()
-    const currentYAxisPoints = currentGraph.get('yAxisPoints') as FormArray
+    const currentYAxisPoints = currentGraph.get('yAxisPoints') as UntypedFormArray
 
     currentYAxisPoints.removeAt(i)
 
