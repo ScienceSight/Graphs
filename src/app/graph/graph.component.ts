@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core'
 import { UntypedFormGroup, UntypedFormArray } from '@angular/forms'
 import { GraphFormService } from '../_services/_graph/graph-form.service'
 import { Subscription } from 'rxjs'
-import * as FunctionCurveEditor from "../../function-curve-editor";
+import * as FunctionCurveEditor from "../function-curve-editor";
 import { NgbPanelChangeEvent, NgbAccordion } from '@ng-bootstrap/ng-bootstrap';
 import { ButtonsState } from '../_models/_graph/buttons-state';
 import { Graph } from '../_models/_graph';
