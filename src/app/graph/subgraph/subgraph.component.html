@@ -1,7 +1,7 @@
 <div class="container">
   <form [formGroup]="subgraphForm" class="d-flex flex-column">
 
-    <div class="input-group mb-2">
+    <div class="input-group">
       <div class="input-group-prepend">
         <label class="input-group-text" for="interpolationType">Interpolation type</label>
       </div>
@@ -10,14 +10,12 @@
       </select>
     </div>
 
+    <span class="mt-2"></span>
+
     <input hidden formControlName="id" placeholder="0">
-    <input formControlName="name" placeholder="Name">
+    <input formControlName="name" class="form-control" placeholder="Name">
     <input hidden formControlName="knots" placeholder="Knots">
     <input hidden formControlName="coordinates" placeholder="Coordinates">
 
-    <!-- emit delete event up w/ index of subgraph -->
-    <!-- <button (click)="delete()">Delete</button> -->
-
-    <pre>Subgraph Form Status: <span class="status">{{subgraphForm.status}}</span></pre>
   </form>
 </div>

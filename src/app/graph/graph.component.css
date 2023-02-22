@@ -4,7 +4,6 @@ ul {
 
 .status {
     color: green;
-    font-weight: 800;
 }
   
 .ng-invalid .status {
