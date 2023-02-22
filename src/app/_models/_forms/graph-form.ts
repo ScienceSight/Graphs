@@ -1,19 +1,19 @@
-import { FormArray, FormControl, FormGroup, FormBuilder } from '@angular/forms'
+import { UntypedFormArray, UntypedFormControl, UntypedFormGroup, FormBuilder } from '@angular/forms'
 import { Graph } from '../_graph/graph'
 
 export class GraphForm {
-    graphName = new FormControl();
-    xAxisName = new FormControl();
-    yAxisName = new FormControl();
-    originPoint = new FormGroup({
-        xCoordinate: new FormControl(),
-        yCoordinate: new FormControl(),
-        xValue: new FormControl(),
-        yValue: new FormControl(),
+    graphName = new UntypedFormControl();
+    xAxisName = new UntypedFormControl();
+    yAxisName = new UntypedFormControl();
+    originPoint = new UntypedFormGroup({
+        xCoordinate: new UntypedFormControl(),
+        yCoordinate: new UntypedFormControl(),
+        xValue: new UntypedFormControl(),
+        yValue: new UntypedFormControl(),
       });
-    subgraphs = new FormArray([]);
-    xAxisPoints = new FormArray([]);
-    yAxisPoints = new FormArray([]);
+    subgraphs = new UntypedFormArray([]);
+    xAxisPoints = new UntypedFormArray([]);
+    yAxisPoints = new UntypedFormArray([]);
 
     constructor(graph: Graph) {
         if (graph.subgraphs) {

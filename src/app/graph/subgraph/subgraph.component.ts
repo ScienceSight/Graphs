@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, ChangeDetectionStrategy, EventEmitter } from '@angular/core'
-import { FormGroup } from '@angular/forms'
+import { UntypedFormGroup } from '@angular/forms'
 import { InterpolationType } from "../../_models/_graph/interpolation-type"
 import { ButtonsState } from 'src/app/_models/_graph/buttons-state'
 
@@ -10,7 +10,7 @@ import { ButtonsState } from 'src/app/_models/_graph/buttons-state'
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SubgraphComponent implements OnInit {
-  @Input() subgraphForm: FormGroup
+  @Input() subgraphForm: UntypedFormGroup
   @Input() index: number
   @Output() deleteSubgraph: EventEmitter<number> = new EventEmitter()
   @Output() toggleAccordian: EventEmitter<string> = new EventEmitter()

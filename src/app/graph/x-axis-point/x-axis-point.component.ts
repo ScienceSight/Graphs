@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, ChangeDetectionStrategy, EventEmitter } from '@angular/core'
-import { FormGroup } from '@angular/forms'
+import { UntypedFormGroup } from '@angular/forms'
 
 @Component({
   selector: 'x-axis-point',
@@ -8,7 +8,7 @@ import { FormGroup } from '@angular/forms'
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class XAxisPointComponent implements OnInit {
-  @Input() xAxisPointForm: FormGroup
+  @Input() xAxisPointForm: UntypedFormGroup
   @Input() index: number
   @Output() deleteXAxisPoint: EventEmitter<number> = new EventEmitter()
   @Output() toggleXAxisPointButton: EventEmitter<MouseEvent> = new EventEmitter()

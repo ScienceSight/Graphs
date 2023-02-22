@@ -1,7 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators, FormArray, FormBuilder} from '@angular/forms';
-import * as FunctionCurveEditor from "../function-curve-editor";
-import {CreateGraphModel} from "./_models/_graph/create-graph-model";
 
 @Component({
   selector: 'app-root',

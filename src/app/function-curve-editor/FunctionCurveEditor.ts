@@ -1,4 +1,4 @@
-import {UniFunction, InterpolationMethod, createInterpolatorWithFallback} from "../commons-math-interpolation";
+import {UniFunction, InterpolationMethod, createInterpolatorWithFallback} from "../commons-math-interpolation/Index";
 import EventTargetPolyfill from "./EventTargetPolyfill";
 import * as DialogManager from "dialog-manager";
 import { ButtonsState } from 'src/app/_models/_graph/buttons-state';
